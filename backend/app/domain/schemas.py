@@ -1,7 +1,11 @@
 # app/domain/schemas.py
 from typing import Any, Dict, List, Literal, Optional, Union
 from datetime import date
+<<<<<<< HEAD
 from pydantic import BaseModel, field_validator
+=======
+from pydantic import BaseModel
+>>>>>>> 0e8a6aa25b1cdc803060666ae99ae09fc8bb603c
 
 # ---------- ENTRADA PARA SIMULACIÓN ----------
 class CustomSimInput(BaseModel):
@@ -30,11 +34,19 @@ SimInput = Union[CustomSimInput, NasaSimInput]
 class MeteorListItem(BaseModel):
     id: int
     name: str
+<<<<<<< HEAD
     estimated_diameter_km: float
     is_potentially_hazardous: bool
     close_approach_date_full: str
     velocity_km_s: float
     miss_distance_km: float
+=======
+    name_limited: str
+    hazardous: bool
+    estimate_date: str   
+    diameter_m: float
+    velocity_kms: float
+>>>>>>> 0e8a6aa25b1cdc803060666ae99ae09fc8bb603c
 
 class MeteorListResponse(BaseModel):
     range: List[str]
