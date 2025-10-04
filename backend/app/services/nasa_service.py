@@ -47,7 +47,7 @@ class NasaNeoService:
                             "name_limited": asteroid.get("name_limited", ""),
                             "estimated_diameter_km": round(diameter_avg, 3),
                             "is_potentially_hazardous": asteroid["is_potentially_hazardous_asteroid"],
-                            "close_approach_date": approach["close_approach_date"],
+                            "close_approach_date_full": approach["close_approach_date_full"],
                             "velocity_km_s": self._parse_float(
                                 approach["relative_velocity"]["kilometers_per_second"]
                             ),

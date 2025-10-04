@@ -1,5 +1,6 @@
 # app/domain/schemas.py
 from typing import Any, Dict, List, Literal, Optional, Union
+from datetime import date
 from pydantic import BaseModel
 
 # ---------- ENTRADA PARA SIMULACIÓN ----------
@@ -23,6 +24,9 @@ SimInput = Union[CustomSimInput, NasaSimInput]
 class MeteorListItem(BaseModel):
     nasa_id: str
     name: str
+    name_limited: str
+    hazardous: bool
+    estimate_date: str   
     diameter_m: float
     velocity_kms: float
 
