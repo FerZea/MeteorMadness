@@ -1,32 +1,83 @@
 import numpy as np
-from typing import Dict, Tuple
+import math
+import json
 
-def kinetic_energy_megatons(diameter_m: float, velocity_kms: float, density_kg_m3: float = 3000) -> float:
-    r = diameter_m / 2.0
-    volume = (4.0/3.0) * np.pi * r**3
-    mass = density_kg_m3 * volume
-    v = velocity_kms * 1000.0
-    energy_j = 0.5 * mass * v**2
-    MT = energy_j / (4.184e15)  # 1 megatón TNT ~ 4.184e15 J
-    return float(MT)
+density = 3000        # density (kg/m^3), average meteor density
+PI = math.pi          # Pi constant
+escapeVelocity = 11.2 # km/s
+dragC = 2             # estimated drag coefficient
+seaDensity = 1.225    # kg/m^3
+scaleH = 8            # Km
+eulerConstant = math.e  # Euler’s number
+gravity = 9.81 * (10**-3)  # km/s^2
+targetDensity = 2500  # sedimentary rock density
 
-def damage_radii_km(energy_mt: float) -> Dict[str, float]:
-    # Placeholders: cambia por tus fórmulas/modelos
-    return {
-        "severe": float(0.8 * energy_mt**(1/3)),
-        "moderate": float(1.6 * energy_mt**(1/3)),
-        "light": float(3.0 * energy_mt**(1/3)),
-    }
+# Load config
+with open("config.json", "r") as f:
+    config = json.load(f)
 
-def circle_geojson(lon: float, lat: float, radius_km: float, steps: int=128) -> dict:
-    # círculo aproximado en WGS84 (muy simple; puedes refinar con geodesia)
-    coords = []
-    R = 6371.0
-    for i in range(steps+1):
-        ang = 2*np.pi * i/steps
-        d = radius_km / R
-        lat1 = np.radians(lat); lon1 = np.radians(lon)
-        lat2 = np.arcsin(np.sin(lat1)*np.cos(d) + np.cos(lat1)*np.sin(d)*np.cos(ang))
-        lon2 = lon1 + np.arctan2(np.sin(ang)*np.sin(d)*np.cos(lat1), np.cos(d)-np.sin(lat1)*np.sin(lat2))
-        coords.append([float(np.degrees(lon2)), float(np.degrees(lat2))])
-    return {"type":"Feature","geometry":{"type":"Polygon","coordinates":[coords]},"properties":{}}
+relativeVelocity = config.get("relativeVelocity") # km/s
+diameter = config.get("diameter") # kilometers
+isTargetWater=config.get("water")
+if isTargetWater==1:
+    targetDensity=1000
+# Calculated constants
+mass = (PI / 6) * (density ) * (1000*diameter**3) 
+entryVelocity = math.sqrt((escapeVelocity**2) + (relativeVelocity)**2)
+
+# Energy formulas
+def kineticEnergy():
+    E = (PI/12) * (density * 10**15) * (diameter**3) * (entryVelocity**2)
+    return E
+
+def energyInMegaTons():
+    E = kineticEnergy()
+    megatons = E / (4.18 * (10**15))
+    return megatons
+
+# Impact velocity formulas
+def ballisticCoefficient():
+    B = (density * diameter) / (dragC * seaDensity * scaleH)
+    return B
+
+def impactVelocity():
+    b = ballisticCoefficient()
+    if(diameter>1):
+        return entryVelocity
+    return entryVelocity * (eulerConstant ** (-1 / b))  # kms/s
+
+# Crater formulas
+def transientCraterDiameter():
+    Vi = impactVelocity()
+    ct = 1.161 * ((density / targetDensity)**(1/3)) * (diameter**0.78) * (Vi**0.44) * (gravity**-0.22)
+    return ct
+
+def finalCraterDiameter():
+    return 1.25 * transientCraterDiameter()
+
+def transientCreaterDepth():
+    return transientCraterDiameter()/2
+
+
+def final_crater_depth_km():
+    """
+    Returns an estimate of the FINAL crater depth (rim-to-floor, in km).
+    Uses a simple/complex split:
+      - simple (< ~4 km final D): depth ≈ 20% of final diameter
+      - complex (≥ ~4 km):        depth ≈ 12% of final diameter
+    """
+    Df = finalCraterDiameter()
+    if Df < 4.0:
+        return 0.20 * Df
+    else:
+        return 0.12 * Df    
+
+# Earthquake formulas
+def seismicEffect():
+    return 0.67 * math.log10(kineticEnergy()) - 5.87
+
+
+ #fireBall
+
+def thermalRadius():
+    0.002*(kineticEnergy**(1/3))   
