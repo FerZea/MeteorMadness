@@ -11,6 +11,13 @@ class CustomSimInput(BaseModel):
     diameter_m: float
     velocity_kms: float
     name: Optional[str] = None
+    
+    @field_validator('lat')
+    def validate_lat(cls, v):
+        if not -90 <= v <= 90:
+            raise ValueError('La latitud debe estar entre -90 y 90')
+        return v
+
 
 class NasaSimInput(BaseModel):
     type: Literal["nasa"]
