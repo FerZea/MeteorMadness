@@ -1,35 +1,53 @@
-from typing import Dict, Any, Literal, Union, Optional
+# app/domain/schemas.py
+from typing import Any, Dict, List, Literal, Optional, Union
 from pydantic import BaseModel
 
-# --- Casos de input ---
+# ---------- ENTRADA PARA SIMULACIÓN ----------
 class CustomSimInput(BaseModel):
     type: Literal["custom"]
     lat: float
     lon: float
     diameter_m: float
     velocity_kms: float
+    name: Optional[str] = None
 
 class NasaSimInput(BaseModel):
     type: Literal["nasa"]
-    nasa_id: str
+    nasa_id: str     # NASA lo maneja como string (aunque parezca número)
     lat: float
     lon: float
 
-# --- Resultado ---
-class resultNasaList(BaseModel):
+SimInput = Union[CustomSimInput, NasaSimInput]
+
+# ---------- LISTADO (pantalla 1) ----------
+class MeteorListItem(BaseModel):
     nasa_id: str
-    name:str
+    name: str
     diameter_m: float
     velocity_kms: float
 
-class resultShowNasaInfo(BaseModel):
+class MeteorListResponse(BaseModel):
+    count: int
+    meteors: List[MeteorListItem]
+
+# ---------- DETALLE / CÁLCULOS (pantalla 2) ----------
+class SimSummary(BaseModel):
+    # “resumen” mínimo (si no quieres GeoJSON aquí)
+    name: str
+    diameter_m: float
+    velocity_kms: float
+
+class SimDetail(BaseModel):
+    # Datos calculados para la segunda pantalla
+    name: str
     energy_in_megatons: float
     impact_velocity: float
-    creater_diameter: float
-    creater_depth: float
+    crater_diameter_m: float
+    crater_depth_m: float
+  
 
-
-# --- Unión de ambos tipos ---
-SimInput = Union[CustomSimInput, NasaSimInput]
-
-__all__ = ["CustomSimInput", "NasaSimInput", "resultNasaList", "resultShowNasaInfo"]
+__all__ = [
+    "CustomSimInput", "NasaSimInput", "SimInput",
+    "MeteorListItem", "MeteorListResponse",
+    "SimSummary", "SimDetail",
+]
