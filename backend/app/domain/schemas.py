@@ -1,6 +1,7 @@
 # app/domain/schemas.py
 from typing import Any, Dict, List, Literal, Optional, Union
-from pydantic import BaseModel
+from datetime import date
+from pydantic import BaseModel, field_validator
 
 # ---------- ENTRADA PARA SIMULACIÓN ----------
 class CustomSimInput(BaseModel):
@@ -13,38 +14,45 @@ class CustomSimInput(BaseModel):
 
 class NasaSimInput(BaseModel):
     type: Literal["nasa"]
-    nasa_id: str     # NASA lo maneja como string (aunque parezca número)
+    nasa_id: str  # NASA lo maneja como string
     lat: float
     lon: float
+
+    @field_validator('lat')
+    def validate_lat(cls, v):
+        if not -90 <= v <= 90:
+            raise ValueError('La latitud debe estar entre -90 y 90')
+        return v
 
 SimInput = Union[CustomSimInput, NasaSimInput]
 
 # ---------- LISTADO (pantalla 1) ----------
 class MeteorListItem(BaseModel):
-    nasa_id: str
+    id: int
     name: str
-    diameter_m: float
-    velocity_kms: float
+    estimated_diameter_km: float
+    is_potentially_hazardous: bool
+    close_approach_date_full: str
+    velocity_km_s: float
+    miss_distance_km: float
 
 class MeteorListResponse(BaseModel):
+    range: List[str]
     count: int
-    meteors: List[MeteorListItem]
+    asteroids: List[MeteorListItem]
 
 # ---------- DETALLE / CÁLCULOS (pantalla 2) ----------
 class SimSummary(BaseModel):
-    # “resumen” mínimo (si no quieres GeoJSON aquí)
     name: str
     diameter_m: float
     velocity_kms: float
 
 class SimDetail(BaseModel):
-    # Datos calculados para la segunda pantalla
     name: str
     energy_in_megatons: float
     impact_velocity: float
     crater_diameter_m: float
     crater_depth_m: float
-  
 
 __all__ = [
     "CustomSimInput", "NasaSimInput", "SimInput",
