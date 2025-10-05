@@ -32,6 +32,8 @@ async def receive_sim_input(payload: SimInput):
     is_water: bool = await serviceWater.get_water_info(payload.lat, payload.lon)
     water_flag = 1 if is_water else 0   # 👈 impact.py espera 0/1
 
+    print("here")
+
     if payload.is_custom:
         config = {
             "relativeVelocity": float(payload.velocity_kms),  # km/s
@@ -42,11 +44,16 @@ async def receive_sim_input(payload: SimInput):
         print(payload.diameter_km, payload.velocity_kms, water_flag)
     else:
         # TODO: resolver estos 2 a partir de nasa_id:
-        estimated_diameter_km = 0.5
-        relative_velocity_kms = 20.0
+        print(payload)
+        try:
+            data = await service.get_filtered_by_item(payload.nasa_id)
+        except Exception as e:
+            raise HTTPException(status_code=502, detail=f"NASA /neo/{{id}} falló: {e}")
+
+
         config = {
-            "relativeVelocity": relative_velocity_kms,       # km/s
-            "diameter": estimated_diameter_km,               # km
+            "relativeVelocity": data.velocity_km_s,       # km/s
+            "diameter": data.estimated_diameter_km,               # km
             "water": water_flag,
         }
 
