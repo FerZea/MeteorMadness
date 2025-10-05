@@ -1,250 +1,188 @@
-# 🛰️ Meteor Impact App
+# ☄️ MeteorMadness
 
-Visualizador de impactos de meteoritos usando **FastAPI (backend)** + **React + Vite + TypeScript + Cesium (frontend)**, con datos de **NASA NEO** y **USGS**.
-
----
-
-## 📦 Estructura del repositorio
-
-```
-meteor-app/
-├── backend/               # API en FastAPI
-│   ├── app/               # Lógica del backend
-│   │   ├── api/           # Rutas de la API (endpoints)
-│   │   │   └── routes_simulation.py   # Rutas de simulación (POST /impact)
-│   │   ├── clients/       # Clientes externos (NASA, USGS, etc.)
-│   │   │   ├── nasa_client.py        # Cliente para la API de NASA NEO
-│   │   │   └── usgs_client.py        # Cliente para la API de USGS
-│   │   ├── core/          # Configuración y variables de entorno
-│   │   │   └── config.py            # Configuración usando pydantic-settings
-│   │   ├── domain/        # Lógica de negocios (cálculos y reglas)
-│   │   │   ├── physics/  # Cálculos de física (energía, radios de daño)
-│   │   │   │   └── impact.py          # Cálculos de impacto y zonas de daño
-│   │   │   └── schemas.py  # Esquemas de entrada y salida (SimInput, SimResult)
-│   │   ├── services/      # Lógica de orquestación entre los diferentes componentes
-│   │   │   └── simulation_service.py    # Servicio que coordina cálculos y llamadas API
-│   │   └── main.py        # Punto de entrada de la API (FastAPI)
-│   ├── requirements.txt   # Dependencias del backend
-│   ├── .env               # Variables de entorno locales (no subir)
-│   └── .env.example       # Plantilla para .env (sí subir)
-│
-├── frontend/              # Interfaz de usuario en React
-│   ├── public/            # Archivos públicos (favicon, cesium)
-│   │   └── cesium/        # Archivos estáticos de Cesium
-│   ├── src/               # Código fuente del frontend
-│   │   ├── components/    # Componentes de React
-│   │   │   ├── CesiumGlobe.tsx    # Componente que muestra el globo Cesium
-│   │   │   └── Controls.tsx       # Componente para los controles (input de usuario)
-│   │   ├── api/           # Clientes para interactuar con la API del backend
-│   │   │   └── client.ts  # Funciones para enviar datos al backend (simulateImpact)
-│   │   ├── App.tsx        # Componente principal (inicia la aplicación)
-│   │   ├── main.tsx       # Punto de entrada (renderiza <App /> y configura Vite)
-│   │   ├── styles.css     # Estilos generales
-│   │   └── vite.config.ts # Configuración de Vite
-│   ├── .env.development   # Variables de entorno para desarrollo
-│   ├── .env.example       # Plantilla para .env (sí subir)
-│   ├── package.json       # Dependencias del frontend
-│   └── index.html         # Plantilla HTML base
-│
-├── .gitignore             # Archivos y carpetas ignoradas por Git
-└── README.md              # Documentación del proyecto
-```
-
-> 📌 **Regla**: `.env` y `.env.development` son privados → **no suben**.  
-> En cambio `.env.example` sí se sube como **plantilla** para guiar al resto del equipo.
+### 🌌 Project submitted to **NASA Space Apps Challenge 2025**
 
 ---
 
-## 🔑 Variables de entorno
+## 🧠 Abstract
 
-### Backend (`backend/.env`)
+**MeteorMadness** is an interactive, educational web app built for the **NASA Space Apps 2025** hackathon.  
+It visualizes the **environmental damage and potential impact** a meteor strike could cause on Earth using real data from the **NASA NEO (Near-Earth Objects) API**.
 
-TIENES QUE CREARLA USA `.env.example` como ejemplo y cambiale el nombre a `.env`  o 
-crea un archivo `.env` dentro de la carpeta `backend/` con la configuración siguiente:
+With this app you can:
+- Browse **real near‑Earth asteroids** recorded by NASA over recent days.
+- Create a **custom meteor** (choose size and velocity).
+- Simulate an impact on a geographic location and **compare it to the Chicxulub meteorite** that contributed to dinosaur extinction.
 
-```env
-# NASA API Key (obligatoria, consíguela en https://api.nasa.gov)
-NASA_API_KEY=tu_api_key_aqui
+Results are rendered on a 3D globe with **CesiumJS**, highlighting impact point, damage area and estimated released energy.
 
-# USGS (opcional, solo si necesitas endpoints privados)
-USGS_USERNAME=
-USGS_PASSWORD=
+---
+
+## 🏗️ Project Structure
+
+```
+MeteorMadness/
+│
+├── backend/                       # FastAPI server (REST API)
+│   ├── app/
+│   │   ├── api/                   # HTTP routes / endpoints
+│   │   │   ├── routes_nasa.py     # NASA NEO endpoints
+│   │   │   ├── physicsapi.py      # Physics / simulation endpoints
+│   │   ├── clients/               # External API clients
+│   │   │   ├── nasa_client.py     # NASA NEO client
+│   │   │   ├── usgs_client.py     # USGS client
+│   │   │   ├── isit_client.py     # IsItWater client
+│   │   ├── core/                  # Settings / helpers
+│   │   ├── domain/                # Business logic + models
+│   │   │   ├── physics/           # Impact math / formulas
+│   │   │   │   ├── impact.py
+│   │   │   ├── schemas.py         # Pydantic schemas (IO contracts)
+│   │   ├── services/              # Orchestration & use cases
+│   │   │   ├── nasa_service.py
+│   │   │   ├── physicService.py
+│   │   │   ├── config_manager.py
+│   │   ├── main.py                # FastAPI app entrypoint
+│   │   ├── .env                   # Secrets (not committed)
+│   │   ├── .env.example           # Example environment
+│   ├── requirements.txt           # Backend dependencies
+│
+├── frontend/                      # React + Vite + TypeScript UI
+│   ├── public/
+│   │   ├── cesium/                # Cesium assets / widgets
+│   │   ├── textures/              # Globe textures
+│   ├── src/
+│   │   ├── api/                   # Backend API client
+│   │   │   ├── client.ts
+│   │   ├── components/            # UI components
+│   │   │   ├── CesiumGlobe.tsx
+│   │   │   ├── AsteroidTable.tsx
+│   │   │   ├── CustomMeteorPanel.tsx
+│   │   │   ├── MeteorComparation.tsx
+│   │   │   ├── LoadingOverlay.tsx
+│   │   │   ├── MainMenu.tsx
+│   │   │   ├── StartScreen.tsx
+│   │   ├── styles.css
+│   │   ├── main.tsx               # React bootstrap
+│   │   ├── App.tsx                # App layout
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   ├── .env.example               # Example frontend env (Cesium token, API base)
+│
+└── README.md
 ```
 
-⚠️ **No subas tu `.env` real a GitHub.** El archivo `.env` ya está en `.gitignore`.
+---
 
-### Frontend (`frontend/.env.development`)
+## ⚙️ Technologies
 
-En el archivo de plantilla `frontend/.env.example` ocupas copiar y cambiarlo a `.env.development` debe de contener con tu token de cesium lo siguiente:
+### 🧩 Backend
+- **FastAPI** — Web framework (REST)
+- **NumPy** — Scientific computing for impact math
+- **Pydantic** — Data validation & type-safe schemas
+- **Uvicorn** — ASGI server
+
+### 🎨 Frontend
+- **React**
+- **TypeScript**
+- **Three.js** — Complementary 3D utilities
+- **Vite**
+- **CesiumJS** — 3D globe & terrain
+
+### 🛰️ External APIs
+- **NASA NEO** → https://api.nasa.gov/
+- **USGS ScienceBase** → https://github.com/DOI-USGS/sciencebasepy
+- **IsItWater** → ocean/land detection by coordinates
+- **Cesium Ion** → global 3D terrain/imagery
+
+---
+
+## 🧭 High‑Level Flow
+
+1. **Frontend** requests near‑term NEOs → `GET /api/nasa/meteors`
+2. **Backend** fetches & filters NASA NEO data → returns clean fields (name, speed, diameter, distance)
+3. The user selects a **real** meteor or defines a **custom** one
+4. **Backend** computes impact physics (energy, crater, damage radii) via `domain/physics/impact.py`
+5. **Frontend** renders the result on **Cesium** (GeoJSON overlays with red shaded areas)
+
+---
+
+## 📸 Screenshots
+
+| Home (menu) | Custom meteor selection | NASA list | Simulator |
+|---|---|---|---|
+| ![Menu](./img/menu.jpeg) | ![Custom](./img/custom.jpeg) | ![List](./img/list.jpeg) | ![Simulation](./img/simulation.jpeg) |
+
+> Place your images under `docs/img/` with these file names: `menu.jpeg`, `custom.jpeg`, `list.jpeg`, `simulation.jpeg`.
+
+---
+
+## 🔑 Environment
+
+### Backend `.env` (copy from `.env.example`)
 
 ```env
-VITE_CESIUM_ION_TOKEN=your_cesium_token_here
+NASA_API_KEY=YOUR_NASA_API_KEY
+USGS_USER=your_usgs_username
+USGS_PASS=your_usgs_password
+ISITWATER_API_KEY=your_isitwater_api_key
+```
+
+### Frontend `.env` (copy from `.env.example`)
+
+```env
 VITE_API_BASE=http://localhost:8000/api
+VITE_CESIUM_ION_TOKEN=YOUR_CESIUM_ION_TOKEN
 ```
 
 ---
 
-## 🌐 Fuentes de APIs y librerías externas
+## 🚀 Run Locally
 
-- **NASA NEO API** → [https://api.nasa.gov/](https://api.nasa.gov/)  
-- **Cesium Ion (globo 3D)** → [https://cesium.com/platform/cesium-ion/](https://cesium.com/platform/cesium-ion/)  
-- **USGS ScienceBase (Python client)** → [https://github.com/DOI-USGS/sciencebasepy](https://github.com/DOI-USGS/sciencebasepy)  
-
----
-
-## ⬇️ Clonar el repositorio
+### Linux / macOS
 
 ```bash
-# Clonar
-git clone https://github.com/FerZea/Prueba_Space_apps.git
-cd meteor-app
-
-# Ver ramas disponibles
-git branch -a
-
-# Cambiar a main
-git checkout main
-```
----
-
-## 🛠️ Instalación
-
-### Backend (FastAPI)
-
-#### Linux / macOS
-1. Crear entorno virtual e instalar dependencias:
-```bash
+# Backend
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate
-cp .env.example .env
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload
+
+# Frontend (in another terminal)
+cd frontend
+npm install
+npm run dev
 ```
-2. Probar:  
-- Health: http://localhost:8000/api/health  
-- Docs: http://localhost:8000/docs  
 
-#### Windows
+### Windows
 
-**PowerShell**
-```powershell
+```bash
+# Backend
 cd backend
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-Copy-Item .env.example .env
+.venv\Scripts\activate
 pip install -r requirements.txt
-python -m uvicorn app.main:app --reload --port 8000
-```
+uvicorn app.main:app --reload
 
-**CMD**
-```bat
-cd backend
-python -m venv .venv
-.\.venv\Scriptsctivate.bat
-copy .env.example .env
-pip install -r requirements.txt
-python -m uvicorn app.main:app --reload --port 8000
-```
-
-**Git Bash**
-```bash
-cd backend
-python -m venv .venv
-source .venv/Scripts/activate
-cp .env.example .env
-pip install -r requirements.txt
-python -m uvicorn app.main:app --reload --port 8000
-```
-
----
-
-### Frontend (React + Vite + Cesium)
-
-#### Linux / macOS
-```bash
+# Frontend (in another terminal)
 cd frontend
-cp .env.example .env.development
-npm install
-npm run dev
-# abre http://localhost:5173
-```
-
-#### Windows (PowerShell / CMD / Git Bash)
-
-**PowerShell**
-```powershell
-cd frontend
-Copy-Item .env.example .env.development
 npm install
 npm run dev
 ```
 
-**CMD**
-```bat
-cd frontend
-copy .env.example .env.development
-npm install
-npm run dev
-```
+---
 
-**Git Bash**
-```bash
-cd frontend
-cp .env.example .env.development
-npm install
-npm run dev
-```
+## 👨‍🚀 Team
 
-> En `src/main.tsx` debe existir:  
-> `import 'cesium/Build/Cesium/Widgets/widgets.css';`
+- **Acox24** — Backend  
+- **Daiavlo** — Backend  
+- **Ferzea** — Backend  
+- **HersonReyez** — Frontend  
+- **AntonioN64** — Frontend  
 
 ---
 
-## 🧪 Flujo de trabajo con Git
+## 🪐 License
 
-```bash
-# crear rama
-git checkout main
-git pull origin main
-git checkout -b feat/<nombre>
-
-# commit y push
-git add .
-git commit -m "feat: descripción clara"
-git push -u origin feat/<nombre>
-
-# abrir Pull Request en GitHub (base: main, compare: tu rama)
-```
-
-Si el remoto tiene cambios: `git pull --rebase origin main` y resuelve conflictos.
-
----
-
-## 📚 Dependencias principales
-
-**Backend**
-- fastapi, uvicorn, httpx (NASA)
-- sciencebasepy (USGS)
-- numpy, pandas, shapely, pyproj
-- python-dotenv / pydantic-settings
-- pytest (dev)
-- Tienes que descargar python y pip: https://www.python.org/downloads/ 
-
-**Frontend**
-- react, vite, typescript
-- cesium (globo 3D)
-- shx (copiado cross‑platform de assets Cesium)
-- Tienes que descargar node.js : https://nodejs.org/es/download
----
-
-## 🐛 Problemas comunes
-
-- **`uvicorn: command not found`** → activa venv o usa `python -m uvicorn`.  
-- **Globo de Cesium pequeño/negro** → falta `widgets.css` o `public/cesium`.  
-- **CORS** → el proxy de Vite apunta a `http://localhost:8000` (cambia `VITE_API_BASE` si es necesario).  
-- **Windows - error de scripts al activar venv** → ejecutar:  
-  ```powershell
-  Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-  ```
----
+Built for the **NASA Space Apps Challenge 2025** for **educational and demonstrative** purposes.

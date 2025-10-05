@@ -41,10 +41,7 @@ async def receive_sim_input(payload: SimInput):
             "water": water_flag,
         }
         
-        print(payload.diameter_km, payload.velocity_kms, water_flag)
     else:
-        # TODO: resolver estos 2 a partir de nasa_id:
-        print(payload)
         try:
             data = await service.get_filtered_by_item(payload.nasa_id)
         except Exception as e:
