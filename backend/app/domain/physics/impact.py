@@ -19,6 +19,7 @@ with open("config.json", "r") as f:
 relativeVelocity = config.get("relativeVelocity") # km/s
 diameter = config.get("diameter") # kilometers
 isTargetWater=config.get("water")
+
 if isTargetWater==1:
     targetDensity=1000
 # Calculated constants

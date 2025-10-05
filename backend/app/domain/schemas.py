@@ -69,7 +69,7 @@ class EarthquakeDetail(BaseModel):
     longitude: float
     latitude: float
     depth_km: float
-    url: str
+   
 
 # ---------- DETALLES SOBRE ISIT WATERAPPI ----------
 class IsitWater(BaseModel):
