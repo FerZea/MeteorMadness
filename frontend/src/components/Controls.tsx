@@ -38,7 +38,7 @@ export default function Controls({
       payload = { is_custom: true, lat, lon, diameter_m, velocity_kms, mass_kg };
     } else {
       if (!selectedAsteroidId) {
-        alert("Selecciona primero un asteroide en la lista.");
+        alert("First select an asteroid from the list.");
         setBusy(false);
         return;
       }
@@ -54,11 +54,11 @@ export default function Controls({
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       console.log("POST OK", payload);
-      alert("Impacto enviado con éxito ✅");
+      alert("Impact sent successfully ✅");
       onDone?.(data);
     } catch (err) {
       console.error("POST error", err);
-      alert("Error al enviar el impacto ❌");
+      alert("Error sending impact ❌");
     } finally {
       setBusy(false);
     }
@@ -117,7 +117,7 @@ export default function Controls({
               borderTop: "1px dashed rgba(255,255,255,0.1)",
             }}
           >
-            <small style={{ opacity: 0.8 }}>Ubicación en mapa</small>
+            <small style={{ opacity: 0.8 }}>Location on map</small>
             <div style={{ marginTop: 6 }}>
               {typeof lat === "number" && typeof lon === "number" ? (
                 <code style={{ fontSize: 13 }}>
@@ -125,7 +125,7 @@ export default function Controls({
                 </code>
               ) : (
                 <span style={{ opacity: 0.8 }}>
-                  Haz click en el globo para elegir una ubicación.
+                  Click on the globe to choose a location.
                 </span>
               )}
             </div>
@@ -133,8 +133,8 @@ export default function Controls({
         </section>
 
         <p style={{ marginTop: 12, fontSize: 12, opacity: 0.8, lineHeight: 1.5 }}>
-          Elige la ubicación en el globo. Cuando estés listo, usa el botón
-          <em> Lanzar meteorito</em> (abajo a la derecha).
+          Choose the location on the globe. When you're ready, use the button
+          <em> Throw meteorite </em> (bottom right).
         </p>
 
         <div style={{ height: 80 }} />
@@ -165,7 +165,7 @@ export default function Controls({
               border: "1px solid rgba(255,255,255,0.12)",
             }}
           >
-            Click en el globo para elegir ubicación
+            Click on the globe to choose location
           </span>
         )}
 
@@ -205,7 +205,7 @@ export default function Controls({
             gap: 8,
           }}
         >
-          🚀 Lanzar meteorito
+          🚀 Throw meteorite
         </button>
       </div>
     </>

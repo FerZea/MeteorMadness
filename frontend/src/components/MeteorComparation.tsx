@@ -81,7 +81,7 @@ function DinoImpactorMesh({ velocity }: { velocity: number }) {
             pointerEvents: "none",
           }}
         >
-          Impactor de Chicxulub (≈10 km)
+          Chicxulub Impact (≈10 km)
         </Html>
       </Billboard>
     </group>
@@ -198,7 +198,7 @@ function ComparisonScene({ diameter, velocity }: Props) {
               pointerEvents: "none",
             }}
           >
-            Meteorito personalizado ({diameter.toFixed(1)} km)
+            Custom Meteorite ({diameter.toFixed(1)} km)
           </Html>
         </Billboard>
       </group>
@@ -219,7 +219,7 @@ export default function MeteorComparation({ diameter, velocity }: Props) {
     <div style={{ width: "100%", height: 360, background: "#000", borderRadius: 12 }}>
       <Canvas shadows camera={{ position: [0, 2.2, 7], fov: 60 }}>
         <color attach="background" args={["#000000"]} />
-        <Suspense fallback={<Html center style={{ color: "#fff" }}>Cargando comparativa…</Html>}>
+        <Suspense fallback={<Html center style={{ color: "#fff" }}>Loading comparison…</Html>}>
           <Stars radius={200} depth={80} count={8000} factor={2} saturation={0} fade speed={0.25} />
           <ambientLight intensity={0.75} />
           <directionalLight position={[6, 8, 4]} intensity={1.4} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
