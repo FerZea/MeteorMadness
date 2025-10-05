@@ -51,12 +51,10 @@ class MeteorListResponse(BaseModel):
 
 # ---------- DETALLE / CÁLCULOS (pantalla 2) ----------
 class SimSummary(BaseModel):
-    name: str
     diameter_m: float
     velocity_kms: float
 
 class SimDetail(BaseModel):
-    name: str
     energy_in_megatons: float
     impact_velocity: float
     crater_diameter_m: float

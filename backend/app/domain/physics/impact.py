@@ -59,7 +59,7 @@ def transientCreaterDepth():
     return transientCraterDiameter()/2
 
 
-def final_crater_depth_km():
+def finalCraterDepthKm():
     """
     Returns an estimate of the FINAL crater depth (rim-to-floor, in km).
     Uses a simple/complex split:
