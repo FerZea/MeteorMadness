@@ -1,8 +1,11 @@
 import impact
 
+
+
+
 if __name__ == "__main__":
     final_diameter = impact.finalCraterDiameter()
-    depth = impact.final_crater_depth_km()
+    depth = impact.finalCraterDepthKm()
     energy = impact.energyInMegaTons()
     magnitude = impact.seismicEffect()
 
@@ -11,3 +14,8 @@ if __name__ == "__main__":
     print(f"Impact Energy: {energy:.2f} Megatons TNT")
     print(f"Estimated Seismic Magnitude: {magnitude:.2f} on Richter scale")
     
+    try:
+        mag = magnitude
+        get_earthquakes_by_magnitude(mag)
+    except ValueError:
+        print("Please enter a valid number.")
