@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Query
 from app.services.isitwater_service import IsItWaterService
 from app.domain.schemas import IsitWater
 
-router = APIRouter(prefix="/nasa", tags=["nasa"])
+router = APIRouter(prefix="/nasa", tags=["isitwater"])
 service = IsItWaterService()
 
 @router.get("/waterCheck", response_model=IsitWater)
