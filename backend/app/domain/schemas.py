@@ -60,8 +60,14 @@ class SimDetail(BaseModel):
     crater_diameter_m: float
     crater_depth_m: float
 
+# ---------- DETALLES SOBRE ISIT WATERAPPI ----------
+class IsitWater(BaseModel):
+    water: bool
+    latitude: float
+    longitude: float
+
 __all__ = [
     "CustomSimInput", "NasaSimInput", "SimInput",
     "MeteorListItem", "MeteorListResponse",
-    "SimSummary", "SimDetail",
+    "SimSummary", "SimDetail", "IsitWater"
 ]
