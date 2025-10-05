@@ -27,6 +27,8 @@ isTargetWater = config.get("water")
 
 if isTargetWater==1:
     targetDensity=1000
+else:
+    targetDensity=2500
 # Calculated constants
 mass = (PI / 6) * (density ) * (1000*diameter**3) 
 entryVelocity = math.sqrt((escapeVelocity**2) + (relativeVelocity)**2)
