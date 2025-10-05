@@ -89,7 +89,7 @@ const AsteroidTable: React.FC<Props> = ({
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nombre o fecha…"
+          placeholder="Search by name or date…"
           style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid #ddd", flex: 1, maxWidth: 360 }}
         />
       </div>
@@ -98,12 +98,12 @@ const AsteroidTable: React.FC<Props> = ({
         <table style={{ borderCollapse: "collapse", minWidth: 760, width: "100%" }}>
           <thead>
             <tr>
-              <Th onClick={() => setSort("name")} active={sortKey === "name"} dir={sortDir}>Nombre</Th>
-              <Th onClick={() => setSort("estimated_diameter_km")} active={sortKey === "estimated_diameter_km"} dir={sortDir}>Diámetro (km)</Th>
-              <Th onClick={() => setSort("is_potentially_hazardous")} active={sortKey === "is_potentially_hazardous"} dir={sortDir}>Peligroso</Th>
-              <Th onClick={() => setSort("close_approach_date_full")} active={sortKey === "close_approach_date_full"} dir={sortDir}>Fecha de acercamiento</Th>
-              <Th onClick={() => setSort("velocity_km_s")} active={sortKey === "velocity_km_s"} dir={sortDir}>Velocidad (km/s)</Th>
-              <Th onClick={() => setSort("miss_distance_km")} active={sortKey === "miss_distance_km"} dir={sortDir}>Distancia (km)</Th>
+              <Th onClick={() => setSort("name")} active={sortKey === "name"} dir={sortDir}>Name</Th>
+              <Th onClick={() => setSort("estimated_diameter_km")} active={sortKey === "estimated_diameter_km"} dir={sortDir}>Diameter (km)</Th>
+              <Th onClick={() => setSort("is_potentially_hazardous")} active={sortKey === "is_potentially_hazardous"} dir={sortDir}>Danger</Th>
+              <Th onClick={() => setSort("close_approach_date_full")} active={sortKey === "close_approach_date_full"} dir={sortDir}>Date of Search</Th>
+              <Th onClick={() => setSort("velocity_km_s")} active={sortKey === "velocity_km_s"} dir={sortDir}>Velocity (km/s)</Th>
+              <Th onClick={() => setSort("miss_distance_km")} active={sortKey === "miss_distance_km"} dir={sortDir}>Distance (km)</Th>
             </tr>
           </thead>
           <tbody>
