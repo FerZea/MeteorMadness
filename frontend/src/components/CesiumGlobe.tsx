@@ -3,21 +3,34 @@ import { useEffect, useRef } from "react";
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
-type Props = {
+export type CesiumGlobeProps = {
   started: boolean;
   geojson: any | null;
-  /** Se llama cada vez que el usuario hace click en el globo */
   onPick?: (pos: { lat: number; lon: number }) => void;
 };
 
-export default function CesiumGlobe({ started, geojson, onPick }: Props) {
+const CesiumGlobe: React.FC<CesiumGlobeProps> = ({ started, geojson, onPick }) => {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const viewerRef = useRef<Cesium.Viewer | null>(null);
   const markerRef = useRef<Cesium.Entity | null>(null);
   const handlerRef = useRef<Cesium.ScreenSpaceEventHandler | null>(null);
 
+  // Mantener siempre la última referencia a onPick SIN re-crear el viewer
+  const onPickRef = useRef<typeof onPick>();
   useEffect(() => {
-    if (!started || !rootRef.current || viewerRef.current) return;
+    onPickRef.current = onPick;
+  }, [onPick]);
+
+  // Evitar doble init en React StrictMode (dev)
+  const initializedRef = useRef(false);
+
+  // Inicialización del viewer (NO depende de onPick)
+  useEffect(() => {
+    if (!started) return;
+    if (initializedRef.current) return;               // ya inicializado
+    if (!rootRef.current || viewerRef.current) return;
+
+    initializedRef.current = true;
 
     const token = import.meta.env.VITE_CESIUM_ION_TOKEN as string | undefined;
     if (token) Cesium.Ion.defaultAccessToken = token;
@@ -36,15 +49,41 @@ export default function CesiumGlobe({ started, geojson, onPick }: Props) {
     });
     viewerRef.current = viewer;
 
-    // Vista inicial
+    viewer.scene.globe.depthTestAgainstTerrain = true;
+
+    // Vista inicial solo una vez
     viewer.camera.setView({
       destination: Cesium.Cartesian3.fromDegrees(-102, 23.6, 2_000_000),
     });
 
-    // ——— Click para colocar marcador rojo ———
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
     handlerRef.current = handler;
 
+    // Helper para poner/actualizar marcador único
+    const placeMarker = (lat: number, lon: number) => {
+      const pos = Cesium.Cartesian3.fromDegrees(lon, lat); // (lon, lat)
+      if (markerRef.current) {
+        markerRef.current.position = pos as any;
+        (markerRef.current.label!.text as any) = new Cesium.ConstantProperty(
+          `Lat: ${lat.toFixed(4)}\nLon: ${lon.toFixed(4)}`
+        );
+      } else {
+        markerRef.current = viewer.entities.add({
+          position: pos,
+          point: {
+            pixelSize: 12,
+            color: Cesium.Color.RED,
+            outlineColor: Cesium.Color.WHITE,
+            outlineWidth: 2,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+          
+        });
+      }
+      viewer.scene.requestRender();
+    };
+
+    // Click izquierdo: colocar/actualizar marcador + notificar
     handler.setInputAction((movement: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
       const scene = viewer.scene;
       const ray = viewer.camera.getPickRay(movement.position);
@@ -52,51 +91,53 @@ export default function CesiumGlobe({ started, geojson, onPick }: Props) {
       const cartesian = scene.globe.pick(ray, scene);
       if (!cartesian) return;
 
-      // Convertir a lat/lon
       const carto = Cesium.Cartographic.fromCartesian(cartesian);
       const lat = Cesium.Math.toDegrees(carto.latitude);
       const lon = Cesium.Math.toDegrees(carto.longitude);
 
-      // Eliminar marcador previo si existe
-      if (markerRef.current) viewer.entities.remove(markerRef.current);
-
-      // Crear punto rojo
-      const marker = viewer.entities.add({
-        position: cartesian,
-        point: {
-          pixelSize: 12,
-          color: Cesium.Color.RED,
-          outlineColor: Cesium.Color.WHITE,
-          outlineWidth: 2
-        },
-        description: `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`
-      });
-      markerRef.current = marker;
-
-      onPick?.({ lat, lon }); //Enviar lat y lon a App.tsx
-      scene.requestRender();
+      placeMarker(lat, lon);
+      onPickRef.current?.({ lat, lon }); // usar ref, no depende del efecto
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    // Click derecho: eliminar marcador
+    handler.setInputAction(() => {
+      if (markerRef.current) {
+        viewer.entities.remove(markerRef.current);
+        markerRef.current = null;
+        viewer.scene.requestRender();
+      }
+    }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
 
     const onResize = () => viewer.resize();
     window.addEventListener("resize", onResize);
     requestAnimationFrame(onResize);
 
+    // Limpieza al desmontar el componente
     return () => {
       window.removeEventListener("resize", onResize);
       if (handlerRef.current) {
         handlerRef.current.destroy();
         handlerRef.current = null;
       }
-      try { viewer.destroy(); } catch {}
+      try {
+        if (viewerRef.current && markerRef.current) {
+          viewerRef.current.entities.remove(markerRef.current);
+        }
+        viewer.destroy();
+      } catch {}
       viewerRef.current = null;
       markerRef.current = null;
+      initializedRef.current = false; // permitir re-init si el componente se desmonta realmente
     };
   }, [started]);
 
-  // Carga GeoJSON si lo hay (opcional)
+  // Carga GeoJSON (no afecta a entidades de marcador)
   useEffect(() => {
     const viewer = viewerRef.current;
-    if (!viewer || !geojson) return;
+    if (!viewer) return;
+
+    // si no hay geojson, no limpies dataSources innecesariamente
+    if (!geojson) return;
 
     viewer.dataSources.removeAll();
     const blob = new Blob([JSON.stringify(geojson)], { type: "application/json" });
@@ -109,6 +150,7 @@ export default function CesiumGlobe({ started, geojson, onPick }: Props) {
     })
       .then((ds) => {
         viewer.dataSources.add(ds);
+        // flyTo del datasource, pero NO toques marker ni cámara base si no quieres “resetear”
         viewer.flyTo(ds);
         viewer.scene.requestRender();
       })
@@ -116,4 +158,6 @@ export default function CesiumGlobe({ started, geojson, onPick }: Props) {
   }, [geojson]);
 
   return <div ref={rootRef} style={{ width: "100%", height: "100vh" }} />;
-}
+};
+
+export default CesiumGlobe;
