@@ -99,21 +99,8 @@ export default function App() {
               alert("Simulación completada ✅");
               setPhase("menu");
             }}
+            onBack={() => setPhase("menu")} // ✅ ahora sí vuelve al menú
           />
-          <button
-            className="btn"
-            style={{
-              position: "fixed",
-              left: 16,
-              bottom: 16,
-              zIndex: 100,
-              background: "#222",
-              color: "#fff",
-            }}
-            onClick={() => setPhase("menu")}
-          >
-            ← Volver al menú
-          </button>
         </>
       )}
     </>
