@@ -1,7 +1,7 @@
 import numpy as np
 import math
 import json
-
+pacopitos = 42
 density = 3000        # density (kg/m^3), average meteor density
 PI = math.pi          # Pi constant
 escapeVelocity = 11.2 # km/s
