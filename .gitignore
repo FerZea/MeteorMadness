@@ -9,6 +9,7 @@ frontend/dist/
 
 # Env files (no subir tokens)
 *.env
+backend/.env
 *.env.*
 !frontend/.env.example
 !backend/.env.example
@@ -20,3 +21,4 @@ pnpm-debug.log*
 
 # mac/linux
 .DS_Store
+backend/.env
