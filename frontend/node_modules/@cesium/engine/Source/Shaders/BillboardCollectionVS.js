@@ -166,9 +166,11 @@ void main()\n\
 \n\
     temp = compressedAttribute0.z * SHIFT_RIGHT8;\n\
     translate.x = floor(temp) - UPPER_BOUND;\n\
+    translate.x *= SHIFT_RIGHT2; // undo translateX scaling (helps preserve subpixel precision, see BillboardCollection.js attribute writer for more info)\n\
 \n\
     translate.y += (temp - floor(temp)) * SHIFT_LEFT8;\n\
     translate.y -= UPPER_BOUND;\n\
+    translate.y *= SHIFT_RIGHT2;\n\
 \n\
     temp = compressedAttribute1.x * SHIFT_RIGHT8;\n\
     float temp2 = floor(compressedAttribute2.w * SHIFT_RIGHT2);\n\
