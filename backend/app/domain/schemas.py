@@ -21,7 +21,7 @@ class CustomSimInput(BaseModel):
 
 class NasaSimInput(BaseModel):
     type: Literal["nasa"]
-    nasa_id: str  # NASA lo maneja como string
+    nasa_id: int  # NASA lo maneja como string
     lat: float
     lon: float
 
