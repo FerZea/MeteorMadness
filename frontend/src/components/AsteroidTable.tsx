@@ -19,8 +19,8 @@ type NasaClosestResponse = {
 type Props = {
   className?: string;
   endpoint?: string;
-  // 👇 NUEVO: callback para seleccionar un asteroide (sin postear)
   onSelect?: (asteroid: Asteroid) => void;
+  selectedId?: number; // 👈 para resaltar
 };
 
 const DEFAULT_GET = "http://192.168.100.32:8000/api/nasa/closest";
@@ -29,10 +29,11 @@ const AsteroidTable: React.FC<Props> = ({
   className,
   endpoint = DEFAULT_GET,
   onSelect,
+  selectedId,
 }) => {
   const [rows, setRows] = useState<Asteroid[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError]   = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<keyof Asteroid>("close_approach_date_full");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -72,7 +73,7 @@ const AsteroidTable: React.FC<Props> = ({
   }, [rows, search, sortKey, sortDir]);
 
   const setSort = (key: keyof Asteroid) => {
-    if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
+    if (sortKey === key) setSortDir(d => (d === "asc" ? "desc" : "asc"));
     else { setSortKey(key); setSortDir("asc"); }
   };
 
@@ -106,32 +107,40 @@ const AsteroidTable: React.FC<Props> = ({
             </tr>
           </thead>
           <tbody>
-            {filtered.map((a) => (
-              <tr
-                key={a.id}
-                onClick={() => onSelect?.(a)} // 👈 ahora solo “selecciona”
-                style={{ cursor: "pointer" }}
-                title="Click para seleccionar este asteroide"
-              >
-                <Td strong>{a.name}</Td>
-                <Td>{fmtNumber(a.estimated_diameter_km, 3)}</Td>
-                <Td>
-                  <span
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: 6, padding: "2px 8px",
-                      borderRadius: 999, fontSize: 12,
-                      background: a.is_potentially_hazardous ? "#fee2e2" : "#dcfce7",
-                      color: a.is_potentially_hazardous ? "#b91c1c" : "#166534",
-                    }}
-                  >
-                    {a.is_potentially_hazardous ? "Sí" : "No"}
-                  </span>
-                </Td>
-                <Td>{a.close_approach_date_full}</Td>
-                <Td>{fmtNumber(a.velocity_km_s, 2)}</Td>
-                <Td>{fmtNumber(a.miss_distance_km)}</Td>
-              </tr>
-            ))}
+            {filtered.map((a) => {
+              const isSelected = selectedId === a.id;
+              return (
+                <tr
+                  key={a.id}
+                  onClick={() => onSelect?.(a)}
+                  style={{
+                    cursor: "pointer",
+                    background: isSelected ? "#c7d2fe" : undefined, // 👈 color de selección
+                    color: isSelected ? "#111" : undefined,         // 👈 texto visible
+                    transition: "background 0.2s ease",
+                  }}
+                  title="Click para seleccionar este asteroide"
+                >
+                  <Td strong>{a.name}</Td>
+                  <Td>{fmtNumber(a.estimated_diameter_km, 3)}</Td>
+                  <Td>
+                    <span
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 6, padding: "2px 8px",
+                        borderRadius: 999, fontSize: 12,
+                        background: a.is_potentially_hazardous ? "#fee2e2" : "#dcfce7",
+                        color: a.is_potentially_hazardous ? "#b91c1c" : "#166534",
+                      }}
+                    >
+                      {a.is_potentially_hazardous ? "Sí" : "No"}
+                    </span>
+                  </Td>
+                  <Td>{a.close_approach_date_full}</Td>
+                  <Td>{fmtNumber(a.velocity_km_s, 2)}</Td>
+                  <Td>{fmtNumber(a.miss_distance_km)}</Td>
+                </tr>
+              );
+            })}
             {filtered.length === 0 && (
               <tr><Td colSpan={6} align="center">No hay resultados con ese filtro.</Td></tr>
             )}
@@ -147,10 +156,14 @@ const tdBase: React.CSSProperties = { padding: "10px 12px", borderBottom: "1px s
 
 const Th: React.FC<{ children: React.ReactNode; onClick?: () => void; active?: boolean; dir?: "asc" | "desc"; }> =
   ({ children, onClick, active, dir }) => (
-    <th onClick={onClick} style={{ ...thBase, cursor: onClick ? "pointer" : "default", userSelect: "none" }}
-        aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}>
+    <th
+      onClick={onClick}
+      style={{ ...thBase, cursor: onClick ? "pointer" : "default", userSelect: "none" }}
+      aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}
+    >
       <span style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
-        {children}{active && <span style={{ fontSize: 10 }}>{dir === "asc" ? "▲" : "▼"}</span>}
+        {children}
+        {active && <span style={{ fontSize: 10 }}>{dir === "asc" ? "▲" : "▼"}</span>}
       </span>
     </th>
   );
