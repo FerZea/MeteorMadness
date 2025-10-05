@@ -146,7 +146,7 @@ export default function MeteorPreview({ diameter, velocity }: Props) {
       {/* FOV amplio para dar sensación de desplazamiento */}
       <Canvas shadows camera={{ position: [0, 2.2, 7], fov: 90 }}>
         <color attach="background" args={["#000000"]} />
-        <Suspense fallback={<Html center style={{ color: "#fff" }}>Cargando meteorito…</Html>}>
+        <Suspense fallback={<Html center style={{ color: "#fff" }}>Loading meteorite…</Html>}>
           <Stars radius={100} depth={50} count={8000} factor={2} saturation={0} fade speed={0.25} />
           <ambientLight intensity={0.75} />
           <directionalLight position={[6, 8, 4]} intensity={1.4} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />

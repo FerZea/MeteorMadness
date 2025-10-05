@@ -27,20 +27,20 @@ export default function RequestsPanel({ onBack, onSimulate }: Props) {
           }}
         >
           <button className="btn small" onClick={onBack}>
-            ← Volver
+            ← Back
           </button>
 
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <span style={{ fontSize: 14, opacity: 0.8 }}>
-              {selectedId ? `Seleccionado: #${selectedId}` : "Selecciona un asteroide"}
+              {selectedId ? `Selected: #${selectedId}` : "Select an asteroid"}
             </span>
             <button
               className="btn"
               disabled={!selectedId}
               onClick={() => selectedId && onSimulate(selectedId)}
-              title={selectedId ? "Simular en el globo" : "Selecciona un asteroide primero"}
+              title={selectedId ? "Simulate in the balloon" : "Select an asteroid first"}
             >
-              ▶ Simular
+              ▶ Simulate
             </button>
           </div>
         </div>

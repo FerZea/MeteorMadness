@@ -37,10 +37,10 @@ export default function CustomMeteorPanel({ onBack, onOpenCesium }: Props) {
       <div className="card" style={{ width: "min(980px, 95vw)" }}>
         {/* Volver */}
         <div className="row" style={{ marginBottom: 8 }}>
-          <button className="btn small" onClick={onBack}>← Volver</button>
+          <button className="btn small" onClick={onBack}>← Back</button>
         </div>
 
-        <h2 style={{ marginTop: 0 }}>Meteorito personalizado</h2>
+        <h2 style={{ marginTop: 0 }}>Custom Meteorite</h2>
 
         <div className="row" style={{ alignItems: "flex-start", gap: 24 }}>
           {/* Columna izquierda: formulario */}
@@ -48,7 +48,7 @@ export default function CustomMeteorPanel({ onBack, onOpenCesium }: Props) {
             {/* Diámetro (km) */}
             <label style={{ width: "100%" }}>
               <div className="row" style={{ justifyContent: "space-between" }}>
-                <span>Diámetro (km)</span>
+                <span>Diameter (km)</span>
                 <strong>{diameterKm.toFixed(3)} km</strong>
               </div>
               <input
@@ -68,7 +68,7 @@ export default function CustomMeteorPanel({ onBack, onOpenCesium }: Props) {
             {/* Velocidad */}
             <label style={{ width: "100%" }}>
               <div className="row" style={{ justifyContent: "space-between" }}>
-                <span>Velocidad (km/s)</span>
+                <span>Speed (km/s)</span>
                 <strong>{velocity.toFixed(1)} km/s</strong>
               </div>
               <input
@@ -88,7 +88,7 @@ export default function CustomMeteorPanel({ onBack, onOpenCesium }: Props) {
             {/* Masa */}
             <label style={{ width: "100%" }}>
               <div className="row" style={{ justifyContent: "space-between" }}>
-                <span>Masa (kg)</span>
+                <span>Mass (kg)</span>
                 <strong>{fmt(masa)} kg</strong>
               </div>
               <input
@@ -107,8 +107,8 @@ export default function CustomMeteorPanel({ onBack, onOpenCesium }: Props) {
 
             {/* Acciones */}
             <div className="row" style={{ gap: 8 }}>
-              <button className="btn btn-primary" type="submit">Simular</button>
-              <button className="btn" type="button" onClick={onBack}>Cancelar</button>
+              <button className="btn btn-primary" type="submit">Simulate</button>
+              <button className="btn" type="button" onClick={onBack}>Cancel</button>
             </div>
 
             {/* Abrir Cesium (➡️ en km) */}
@@ -118,7 +118,7 @@ export default function CustomMeteorPanel({ onBack, onOpenCesium }: Props) {
                 type="button"
                 onClick={() => onOpenCesium(diameterKm, velocity, masa)}
               >
-                Ver en mapa 🌍
+                View on map 🌍
               </button>
             </div>
           </form>
@@ -127,8 +127,8 @@ export default function CustomMeteorPanel({ onBack, onOpenCesium }: Props) {
           <div style={{ flex: "1 1 360px", minWidth: 320 }}>
             <MeteorComparation diameter={diameterKm} velocity={velocity} />
             <div style={{ marginTop: 8, fontSize: 13, color: "var(--muted)" }}>
-              Vista previa — la escala y la apariencia reaccionan a los valores (km).
-              <br />Arrastra para rotar.
+              Preview — scale and appearance react to values (km).
+              <br />Drag to rotate.
             </div>
           </div>
         </div>

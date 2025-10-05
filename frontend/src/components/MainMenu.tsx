@@ -15,7 +15,7 @@ export default function MainMenu({ onCustom, onRequests }: Props) {
     <div className="screen center">
       <div className="card" style={{ width: "min(980px, 95vw)" }}>
         <h2 style={{ marginTop: 0, textAlign: "center" }}>
-          🌠 Menú principal
+          🌠 Main menu
         </h2>
 
         {/* Layout: preview a la izquierda, botones a la derecha (responsive) */}
@@ -38,7 +38,7 @@ export default function MainMenu({ onCustom, onRequests }: Props) {
                 textAlign: "center",
               }}
             >
-              Vista previa — meteorito orbitando el centro de la escena.
+              Preview — meteorite orbiting the center of the scene.
             </div>
           </div>
 
@@ -53,11 +53,11 @@ export default function MainMenu({ onCustom, onRequests }: Props) {
             }}
           >
             <button className="btn btn-primary" onClick={onCustom}>
-              🚀 Meteorito personalizado
+              🚀 Custom Meteorite
             </button>
 
             <button className="btn btn-secondary" onClick={onRequests}>
-              📩 Solicitudes de meteoritos
+              📩 Meteorite Requests
             </button>
           </div>
         </div>
