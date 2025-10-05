@@ -1,33 +1,30 @@
-import { useEffect, useRef } from "react"
-import * as Cesium from "cesium"
-
-const ionToken = import.meta.env.VITE_CESIUM_ION_TOKEN as string | undefined
+// src/components/CesiumGlobe.tsx
+import { useEffect, useRef } from "react";
+import * as Cesium from "cesium";
+import "cesium/Build/Cesium/Widgets/widgets.css";
 
 type Props = {
-  started: boolean         // inicializa el viewer
-  visible: boolean         // muestra/oculta el canvas sin destruir
-  geojson: any | null
-  onTilesLoaded?: () => void
-  onFirstRender?: () => void
-}
+  started: boolean;
+  geojson: any | null;
+  /** Se llama cada vez que el usuario hace click en el globo */
+  onPick?: (pos: { lat: number; lon: number }) => void;
+};
 
-export default function CesiumGlobe({
-  started,
-  visible,
-  geojson,
-  onTilesLoaded,
-  onFirstRender,
-}: Props) {
-  const rootRef = useRef<HTMLDivElement | null>(null)
-  const viewerRef = useRef<Cesium.Viewer | null>(null)
+export default function CesiumGlobe({ started, geojson, onPick }: Props) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const viewerRef = useRef<Cesium.Viewer | null>(null);
+  const markerRef = useRef<Cesium.Entity | null>(null);
+  const handlerRef = useRef<Cesium.ScreenSpaceEventHandler | null>(null);
 
   useEffect(() => {
-    if (!started || !rootRef.current || viewerRef.current) return
+    if (!started || !rootRef.current || viewerRef.current) return;
 
-    if (ionToken) Cesium.Ion.defaultAccessToken = ionToken
+    const token = import.meta.env.VITE_CESIUM_ION_TOKEN as string | undefined;
+    if (token) Cesium.Ion.defaultAccessToken = token;
 
+    const terrain = token ? Cesium.Terrain.fromWorldTerrain() : undefined;
     const viewer = new Cesium.Viewer(rootRef.current, {
-      terrain: ionToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
+      terrain,
       animation: false,
       timeline: false,
       baseLayerPicker: true,
@@ -36,116 +33,74 @@ export default function CesiumGlobe({
       navigationHelpButton: false,
       requestRenderMode: true,
       maximumRenderTimeChange: Infinity,
-    })
-    viewerRef.current = viewer
+    });
+    viewerRef.current = viewer;
 
-    // ---- IMAGERY: Ion World Imagery si hay token, OSM fallback ----
-    ;(async () => {
-      let imagery: Cesium.ImageryProvider
-      try {
-        if (ionToken) {
-          imagery = await Cesium.createWorldImageryAsync({
-            style: Cesium.IonWorldImageryStyle.AERIAL,
-          })
-        } else {
-          imagery = new Cesium.OpenStreetMapImageryProvider({
-            url: "https://a.tile.openstreetmap.org/",
-          })
-        }
-      } catch (e) {
-        console.warn("[Cesium] imagery error, fallback OSM", e)
-        imagery = new Cesium.OpenStreetMapImageryProvider({
-          url: "https://a.tile.openstreetmap.org/",
-        })
-      }
+    // Vista inicial
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(-102, 23.6, 2_000_000),
+    });
 
-      // Espera a readyPromise si existe
-      if ((imagery as any).readyPromise) {
-        try { await (imagery as any).readyPromise } catch {}
-      }
+    // ——— Click para colocar marcador rojo ———
+    const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+    handlerRef.current = handler;
 
-      viewer.scene.imageryLayers.removeAll()
-      viewer.scene.imageryLayers.addImageryProvider(imagery)
+    handler.setInputAction((movement: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
+      const scene = viewer.scene;
+      const ray = viewer.camera.getPickRay(movement.position);
+      if (!ray) return;
+      const cartesian = scene.globe.pick(ray, scene);
+      if (!cartesian) return;
 
-      // Calidad
-      viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 2)
-      viewer.scene.postProcessStages.fxaa.enabled = true
-      if ((viewer.scene as any).context?.msaaSupported) {
-        ;(viewer.scene as any).msaaSamples = 4
-      }
-      viewer.scene.globe.maximumScreenSpaceError = 1.6
-      viewer.scene.globe.enableLighting = false
-      viewer.scene.globe.showGroundAtmosphere = true
+      // Convertir a lat/lon
+      const carto = Cesium.Cartographic.fromCartesian(cartesian);
+      const lat = Cesium.Math.toDegrees(carto.latitude);
+      const lon = Cesium.Math.toDegrees(carto.longitude);
 
-      // Primer frame
-      const firstRender = () => {
-        onFirstRender?.()
-        viewer.scene.postRender.removeEventListener(firstRender)
-      }
-      viewer.scene.postRender.addEventListener(firstRender)
+      // Eliminar marcador previo si existe
+      if (markerRef.current) viewer.entities.remove(markerRef.current);
 
-      // ---- FIN DE CARGA CON FALLBACK ----
-      let done = false
-      const markDone = (reason: string) => {
-        if (!done) {
-          done = true
-          console.log("[Cesium] tiles loaded:", reason)
-          onTilesLoaded?.()
-        }
-      }
+      // Crear punto rojo
+      const marker = viewer.entities.add({
+        position: cartesian,
+        point: {
+          pixelSize: 12,
+          color: Cesium.Color.RED,
+          outlineColor: Cesium.Color.WHITE,
+          outlineWidth: 2
+        },
+        description: `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`
+      });
+      markerRef.current = marker;
 
-      // 1) Evento oficial
-      const onTileProgress = (pending: number) => {
-        // console.log("pending tiles:", pending)
-        if (pending === 0) {
-          viewer.scene.globe.tileLoadProgressEvent.removeEventListener(onTileProgress)
-          markDone("tileLoadProgressEvent==0")
-        }
-      }
-      viewer.scene.globe.tileLoadProgressEvent.addEventListener(onTileProgress)
+      onPick?.({ lat, lon });
+      scene.requestRender();
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-      // 2) Fallback por si el evento nunca llega a 0 (red lenta / provider raro)
-      const fallback1 = setTimeout(() => markDone("fallback 3s"), 3000)
-      const fallback2 = setTimeout(() => markDone("fallback 6s"), 6000)
-
-      // Cámara
-      viewer.camera.setView({ destination: Cesium.Cartesian3.fromDegrees(0, 0, 40_000_000) })
-      viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(-102, 23.6, 2_000_000),
-        duration: 2.6,
-        easingFunction: Cesium.EasingFunction.QUADRATIC_OUT,
-      })
-
-      const onResize = () => viewer.resize()
-      window.addEventListener("resize", onResize)
-      requestAnimationFrame(onResize)
-
-      // Limpieza
-      ;(viewer as any)._cleanup = () => {
-        window.removeEventListener("resize", onResize)
-        try {
-          viewer.scene.globe.tileLoadProgressEvent.removeEventListener(onTileProgress)
-        } catch {}
-        clearTimeout(fallback1)
-        clearTimeout(fallback2)
-        try { viewer.destroy() } catch {}
-        viewerRef.current = null
-      }
-    })()
+    const onResize = () => viewer.resize();
+    window.addEventListener("resize", onResize);
+    requestAnimationFrame(onResize);
 
     return () => {
-      ;(viewerRef.current as any)?._cleanup?.()
-    }
-  }, [started, onTilesLoaded, onFirstRender])
+      window.removeEventListener("resize", onResize);
+      if (handlerRef.current) {
+        handlerRef.current.destroy();
+        handlerRef.current = null;
+      }
+      try { viewer.destroy(); } catch {}
+      viewerRef.current = null;
+      markerRef.current = null;
+    };
+  }, [started, onPick]);
 
-  // GeoJSON
+  // Carga GeoJSON si lo hay (opcional)
   useEffect(() => {
-    const viewer = viewerRef.current
-    if (!viewer || !geojson) return
+    const viewer = viewerRef.current;
+    if (!viewer || !geojson) return;
 
-    viewer.dataSources.removeAll()
-    const blob = new Blob([JSON.stringify(geojson)], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
+    viewer.dataSources.removeAll();
+    const blob = new Blob([JSON.stringify(geojson)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
 
     Cesium.GeoJsonDataSource.load(url, {
       clampToGround: true,
@@ -153,22 +108,12 @@ export default function CesiumGlobe({
       fill: Cesium.Color.fromAlpha(Cesium.Color.RED, 0.35),
     })
       .then((ds) => {
-        viewer.dataSources.add(ds)
-        viewer.flyTo(ds)
-        URL.revokeObjectURL(url)
-        viewer.scene.requestRender()
+        viewer.dataSources.add(ds);
+        viewer.flyTo(ds);
+        viewer.scene.requestRender();
       })
-      .catch(() => URL.revokeObjectURL(url))
-  }, [geojson])
+      .finally(() => URL.revokeObjectURL(url));
+  }, [geojson]);
 
-  return (
-    <div
-      ref={rootRef}
-      style={{
-        width: "100%",
-        height: "100vh",
-        display: visible ? "block" : "none",
-      }}
-    />
-  )
+  return <div ref={rootRef} style={{ width: "100%", height: "100vh" }} />;
 }
