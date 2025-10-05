@@ -15,6 +15,6 @@ class IsItWaterService:
         Llama al cliente de IsItWater y transforma la respuesta en el formato del dominio.
         """
         data = await self.client.fetch_is_water(lat, lon)
-        
-        return data
+        # La API suele regresar {"water": true/false}. Defensivo por si falta el campo:
+        return bool(data.get("water", False))
 

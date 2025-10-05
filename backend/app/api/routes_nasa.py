@@ -3,9 +3,12 @@ from datetime import date, timedelta
 from app.services.nasa_service import NasaNeoService
 from app.domain.schemas import MeteorListResponse
 from app.domain.schemas import SimInput
+from app.services.isitwater_service import IsItWaterService
+from app.services.config_manager import write_impact_config
 
 router = APIRouter(prefix="/nasa", tags=["nasa"])
 service = NasaNeoService()
+serviceWater = IsItWaterService()
 
 @router.get("/closest", response_model=MeteorListResponse)
 async def get_closest_asteroids():
@@ -22,18 +25,37 @@ async def get_closest_asteroids():
             "asteroids": items
         }
 
-  
 @router.post("/input")
 async def receive_sim_input(payload: SimInput):
-    if payload.is_custom:
-        # Custom asteroid sim
-        print(f"🪐 CUSTOM -> {payload.name or 'Sin nombre'}")
-        print(f"Lat: {payload.lat}, Lon: {payload.lon}")
-        print(f"Diámetro: {payload.diameter_m} m, Velocidad: {payload.velocity_kms} km/s")
-        return {"ok": True, "is_custom": payload.is_custom, "name": payload.name}
+    
+    # 👇 Servicio devuelve bool
+    is_water: bool = await serviceWater.get_water_info(payload.lat, payload.lon)
+    water_flag = 1 if is_water else 0   # 👈 impact.py espera 0/1
 
+    print("here")
+
+    if payload.is_custom:
+        config = {
+            "relativeVelocity": float(payload.velocity_kms),  # km/s
+            "diameter": float(payload.diameter_km),           # 👈 km directo
+            "water": water_flag,
+        }
+        
+        print(payload.diameter_km, payload.velocity_kms, water_flag)
     else:
-        # NASA asteroid sim
-        print(f"☄️ NASA ID -> {payload.nasa_id}")
-        print(f"Lat: {payload.lat}, Lon: {payload.lon}")
-        return {"ok": True, "is_custom": payload.is_custom, "id": payload.nasa_id}
+        # TODO: resolver estos 2 a partir de nasa_id:
+        print(payload)
+        try:
+            data = await service.get_filtered_by_item(payload.nasa_id)
+        except Exception as e:
+            raise HTTPException(status_code=502, detail=f"NASA /neo/{{id}} falló: {e}")
+
+
+        config = {
+            "relativeVelocity": data.velocity_km_s,       # km/s
+            "diameter": data.estimated_diameter_km,               # km
+            "water": water_flag,
+        }
+
+    write_impact_config(config)
+    return {"ok": True, "saved_config": config}
