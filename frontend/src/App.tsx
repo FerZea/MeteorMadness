@@ -1,28 +1,43 @@
-import { useState } from 'react'
-import CesiumGlobe from './components/CesiumGlobe'
-import Controls from './components/Controls'
-import { simulateImpact } from './api/client'
+import { useEffect, useState } from "react";
+import LoadingOverlay from "./components/LoadingOverlay";
+import StartScreen from "./components/StartScreen";
+import MainMenu from "./components/MainMenu";
+import CustomMeteorPanel from "./components/CustomMeteorPanel";
+import RequestsPanel from "./components/RequestsPanel";
+
+type Phase = "loading" | "gate" | "menu" | "custom" | "requests";
 
 export default function App() {
-  const [geojson, setGeojson] = useState<any | null>(null)
-  const [busy, setBusy] = useState(false)
+  const [phase, setPhase] = useState<Phase>("loading");
 
-  const run = async (p: { lat: number; lon: number; diameter_m: number; velocity_kms: number }) => {
-    setBusy(true)
-    try {
-      const data = await simulateImpact(p)
-      setGeojson(data)
-    } finally { setBusy(false) }
-  }
+  // “Carga real” simulada: aquí luego puedes poner fetch/config inicial
+  useEffect(() => {
+    const t = setTimeout(() => setPhase("gate"), 1200);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
-    <div className="layout">
-      <div className="sidebar">
-        <Controls onRun={run} busy={busy} />
-      </div>
-      <div className="globe">
-        <CesiumGlobe geojson={geojson} />
-      </div>
-    </div>
-  )
+    <>
+      {phase === "loading" && <LoadingOverlay text="Cargando recursos…" />}
+
+      {phase === "gate" && (
+        <StartScreen onStart={() => setPhase("menu")} />
+      )}
+
+      {phase === "menu" && (
+        <MainMenu
+          onCustom={() => setPhase("custom")}
+          onRequests={() => setPhase("requests")}
+        />
+      )}
+
+      {phase === "custom" && (
+        <CustomMeteorPanel onBack={() => setPhase("menu")} />
+      )}
+
+      {phase === "requests" && (
+        <RequestsPanel onBack={() => setPhase("menu")} />
+      )}
+    </>
+  );
 }

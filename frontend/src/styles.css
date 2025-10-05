@@ -1,28 +1,37 @@
-html, body, #root { height: 100%; margin: 0; }
+:root {
+  --bg:#0b0f1a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8; --accent:#2563eb;
+}
 * { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body { margin:0; background: var(--bg); color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
 
-.layout {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
+.screen { position: fixed; inset: 0; padding: 24px; }
+.center { display: grid; place-items: center; }
+.card {
+  background: var(--card); border: 1px solid #1f2937; border-radius: 16px;
+  padding: 24px; width: min(680px, 95vw); box-shadow: 0 10px 30px rgba(0,0,0,.35);
 }
-
-.sidebar {
-  width: 320px;
-  padding: 12px;
-  overflow: auto;
-  background: #fff;
-  z-index: 2;
+.row { display:flex; gap:12px; flex-wrap:wrap; }
+.form { display:grid; gap:12px; margin-top:12px; }
+.form label { display:flex; flex-direction:column; gap:6px; font-size:14px; color:var(--muted); }
+input {
+  padding:10px 12px; border-radius:10px; border:1px solid #374151;
+  background:#0b1220; color:var(--text);
 }
-
-.globe {
-  flex: 1;
-  position: relative; /* para posicionar el hijo absoluto */
-  min-width: 0;
+.btn {
+  cursor:pointer; padding:10px 16px; border-radius:12px;
+  border:1px solid #374151; background:#0b1220; color:var(--text);
 }
-
-/* Cesium llena el contenedor */
-.cesium-root { position: absolute; inset: 0; width: 100%; height: 100%; }
-.cesium-widget, .cesium-viewer, .cesium-viewer-cesiumWidgetContainer {
-  width: 100% !important; height: 100% !important;
+.btn.small { padding:6px 10px; font-size: 14px; }
+.btn-primary { background: var(--accent); border-color: var(--accent); }
+.btn-primary:hover { filter: brightness(1.05); }
+.btn-secondary { background:#334155; border-color:#334155; }
+.spinner {
+  width:40px; height:40px; border-radius:50%;
+  border:4px solid #334155; border-top-color: var(--accent);
+  animation: spin 1s linear infinite; margin:12px auto;
 }
+@keyframes spin { to { transform: rotate(360deg) } }
+.list { margin-top:12px; display:grid; gap:8px; padding-left: 18px; }
+.error { color:#f87171; }
