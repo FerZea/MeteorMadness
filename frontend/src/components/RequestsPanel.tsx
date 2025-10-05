@@ -47,6 +47,7 @@ export default function RequestsPanel({ onBack, onSimulate }: Props) {
 
         {/* Pasamos el handler y el id para resaltar la fila */}
         <AsteroidTable onSelect={handleSelect} selectedId={selectedId ?? undefined} />
+        
       </div>
     </div>
   );

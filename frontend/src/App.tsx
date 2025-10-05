@@ -95,11 +95,7 @@ export default function App() {
             mass_kg={meteor.mass_kg}
             isCustom={isCustom}
             selectedAsteroidId={selectedAsteroidId}
-            onDone={() => {
-              alert("Simulación completada ✅");
-              setPhase("menu");
-            }}
-            onBack={() => setPhase("menu")} // ✅ ahora sí vuelve al menú
+            
           />
         </>
       )}
