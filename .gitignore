@@ -20,3 +20,4 @@ pnpm-debug.log*
 
 # mac/linux
 .DS_Store
+backend/.env
