@@ -73,7 +73,7 @@ export default function CesiumGlobe({ started, geojson, onPick }: Props) {
       });
       markerRef.current = marker;
 
-      onPick?.({ lat, lon });
+      onPick?.({ lat, lon }); //Enviar lat y lon a App.tsx
       scene.requestRender();
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
@@ -91,7 +91,7 @@ export default function CesiumGlobe({ started, geojson, onPick }: Props) {
       viewerRef.current = null;
       markerRef.current = null;
     };
-  }, [started, onPick]);
+  }, [started]);
 
   // Carga GeoJSON si lo hay (opcional)
   useEffect(() => {
