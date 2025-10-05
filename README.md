@@ -151,6 +151,10 @@ uvicorn app.main:app --reload
 
 # Frontend (in another terminal)
 cd frontend
+
+npm i three@0.157.0 @react-three/fiber@8.13.7 @react-three/drei@9.88.9 --legacy-peer-deps
+Linux
+rm -rf node_modules package-lock.json
 npm install
 npm run dev
 ```
@@ -167,6 +171,8 @@ uvicorn app.main:app --reload
 
 # Frontend (in another terminal)
 cd frontend
+Remove-Item -Recurse -Force node_modules
+Remove-Item -Force package-lock.json
 npm install
 npm run dev
 ```
