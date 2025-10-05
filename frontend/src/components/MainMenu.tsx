@@ -38,7 +38,6 @@ export default function MainMenu({ onCustom, onRequests }: Props) {
                 textAlign: "center",
               }}
             >
-              Preview — meteorite orbiting the center of the scene.
             </div>
           </div>
 

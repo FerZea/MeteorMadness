@@ -42,7 +42,7 @@ export default function App() {
 
   return (
     <>
-      {phase === "loading" && <LoadingOverlay text="Cargando recursos…" />}
+      {phase === "loading" && <LoadingOverlay text="Loading..." />}
       {phase === "gate" && <StartScreen onStart={() => setPhase("menu")} />}
 
       {phase === "menu" && (

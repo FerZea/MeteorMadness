@@ -4,10 +4,10 @@ export default function StartScreen({ onStart }: Props) {
   return (
     <div className="screen center">
       <div className="card" style={{ textAlign: "center" }}>
-        <h1 style={{ marginTop: 0 }}>Meteor Madness</h1>
-        <p>Welcome. Click to begin.</p>
+        <h1 style={{ marginTop: 0 }}>Meteor Analisis Simulator</h1>
+        <p>Click to Start</p>
         <button className="btn btn-primary" onClick={onStart}>
-          Begin
+          start
         </button>
       </div>
     </div>

@@ -1,6 +1,4 @@
-// src/components/Controls.tsx
 import { useState } from "react";
-import MeteorSimOverlay from "./MeteorSimOverlay";
 import ImpactReviewOverlay, { ImpactBackendResult } from "./ImpactReviewOverlay";
 
 type Props = {
@@ -27,19 +25,18 @@ export default function Controls({
   onBack,
 }: Props) {
   const [busy, setBusy] = useState(false);
-  const [simOn, setSimOn] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [result, setResult] = useState<ImpactBackendResult | undefined>(undefined);
 
   const canFire = typeof lat === "number" && typeof lon === "number" && !busy;
 
-  /** Enviar datos al backend */
+  /** Envía datos al backend y abre la vista de resultados */
   const postImpact = async () => {
     if (typeof lat !== "number" || typeof lon !== "number") return;
 
     const POST_URL = "http://192.168.100.32:8000/api/nasa/input";
-
     let payload: Record<string, any>;
+
     if (isCustom) {
       payload = { is_custom: true, lat, lon, diameter_km, velocity_kms, mass_kg };
     } else {
@@ -71,35 +68,18 @@ export default function Controls({
     }
   };
 
-  /** Iniciar simulación */
-  const startSimulation = () => {
+  /** Inicia el proceso de simulación → directamente muestra resultados */
+  const startSimulation = async () => {
     if (!canFire) {
       alert("Click on the globe to choose a location first.");
       return;
     }
-    setSimOn(true);
+    await postImpact();
   };
 
   return (
     <>
-      {/* Overlay de simulación (Three.js + animación de meteorito) */}
-      <MeteorSimOverlay
-        active={simOn}
-        diameter_km={diameter_km}
-        velocity_kms={velocity_kms}
-        label={
-          typeof lat === "number" && typeof lon === "number"
-            ? `lat: ${lat.toFixed(4)}   lon: ${lon.toFixed(4)}`
-            : "Simulating..."
-        }
-        onFinish={async () => {
-          // Ya no mostramos mensajes, ni “terminó simulación”
-          setSimOn(false);
-          await postImpact();
-        }}
-      />
-
-      {/* Overlay de revisión con datos y mapa Cesium */}
+      {/* Overlay con la vista de resultados del impacto */}
       {typeof lat === "number" && typeof lon === "number" && (
         <ImpactReviewOverlay
           open={reviewOpen}
@@ -182,7 +162,7 @@ export default function Controls({
 
         <p style={{ marginTop: 12, fontSize: 12, opacity: 0.8, lineHeight: 1.5 }}>
           Cuando estés listo, usa el botón{" "}
-          <em>Start simulation</em> para iniciar la animación y mostrar los resultados.
+          <em>Start simulation</em> para mostrar los resultados del impacto.
         </p>
 
         <div style={{ height: 80 }} />
@@ -208,7 +188,7 @@ export default function Controls({
               textShadow: "0 1px 2px rgba(0,0,0,.6)",
               fontSize: 13,
               background: "rgba(0,0,0,0.4)",
-              padding: "8px 10px)",
+              padding: "8px 10px",
               borderRadius: 10,
               border: "1px solid rgba(255,255,255,0.12)",
             }}
@@ -217,31 +197,30 @@ export default function Controls({
           </span>
         )}
 
-        {/* Volver opcional, no afecta flujo */}
-        {onBack && (
-          <button
-            onClick={onBack}
-            style={{
-              padding: "10px 14px",
-              borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.2)",
-              background: "rgba(0,0,0,0.45)",
-              color: "white",
-              cursor: "pointer",
-              boxShadow: "0 6px 16px rgba(0,0,0,0.35)",
-            }}
-          >
-            ← Volver
-          </button>
-        )}
+        {/* Botón Volver (siempre visible) */}
+        <button
+          onClick={onBack ?? (() => console.log("Volver presionado (sin acción definida)"))}
+          style={{
+            padding: "10px 14px",
+            borderRadius: 12,
+            border: "1px solid rgba(255,255,255,0.2)",
+            background: "rgba(0,0,0,0.45)",
+            color: "white",
+            cursor: "pointer",
+            boxShadow: "0 6px 16px rgba(0,0,0,0.35)",
+          }}
+        >
+          ← Volver
+        </button>
 
+        {/* Botón principal */}
         <button
           className="btn btn-primary"
           onClick={startSimulation}
-          disabled={!canFire || busy || simOn}
+          disabled={!canFire || busy}
           title={
             canFire
-              ? "Iniciar animación y mostrar resultados"
+              ? "Enviar impacto y mostrar resultados"
               : "Haz clic en el mapa para elegir ubicación"
           }
           style={{
@@ -257,14 +236,14 @@ export default function Controls({
             gap: 8,
           }}
         >
-          {busy || simOn ? "Simulando…" : "🚀 Start simulation"}
+          {busy ? "Cargando…" : "🚀 Start simulation"}
         </button>
       </div>
     </>
   );
 }
 
-/** Componente auxiliar de campo visual */
+/** Campo informativo reutilizable */
 function Field({ label, value }: { label: string; value: number | string }) {
   return (
     <div
