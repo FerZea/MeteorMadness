@@ -10,6 +10,8 @@ type Props = {
   diameter_m: number;
   velocity_kms: number;
   mass_kg: number;
+  isCustom: boolean;
+  selectedAsteroidId: number | null;
   onDone?: (result: unknown) => void;
 };
 
@@ -19,31 +21,56 @@ export default function Controls({
   diameter_m,
   velocity_kms,
   mass_kg,
+  isCustom,
+  selectedAsteroidId,
   onDone,
 }: Props) {
   const [busy, setBusy] = useState(false);
   const canFire = typeof lat === "number" && typeof lon === "number" && !busy;
 
   const handleFire = async () => {
-    if (!canFire) return;
-    setBusy(true);
-    try {
-      const res = await postMeteorImpact({
-        lat: lat!,
-        lon: lon!,
-        diameter_m,
-        velocity_kms,
-        mass_kg,
-      });
-      onDone?.(res);
-      alert("Impacto enviado con éxito ✅");
-    } catch (err: any) {
-      console.error(err);
-      alert("Error al enviar el impacto ❌");
-    } finally {
+  if (!canFire) return;
+  setBusy(true);
+
+  const POST_URL = "http://192.168.100.32:8000/api/nasa/input";
+
+  let payload: Record<string, any>;
+
+  if (isCustom) {
+    payload = {
+      is_custom: true,
+      lat,
+      lon,
+      diameter_m,
+      velocity_kms,
+      mass_kg,
+    };
+  } else {
+    if (!selectedAsteroidId) {
+      alert("Selecciona primero un asteroide en la lista.");
       setBusy(false);
+      return;
     }
-  };
+    payload = { is_custom: false, id: selectedAsteroidId, lat, lon };
+  }
+
+  try {
+    const res = await fetch(POST_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    console.log("POST OK", payload);
+    alert("Impacto enviado con éxito ✅");
+    onDone?.(await res.json());
+  } catch (err: any) {
+    console.error("POST error", err);
+    alert("Error al enviar el impacto ❌");
+  } finally {
+    setBusy(false);
+  }
+};
 
   return (
     <div

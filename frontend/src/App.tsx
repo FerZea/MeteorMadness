@@ -35,42 +35,9 @@ export default function App() {
 
   // Handler de clic en el globo
   const handlePickOnGlobe = async ({ lat, lon }: { lat: number; lon: number }) => {
+
+    // Solo obtiene Lat y Lon, el post se hara en controls.tsx
     setSelected({ lat, lon });
-
-    const POST_URL = "http://192.168.100.32:8000/api/nasa/input";
-
-    // Crea el payload según el tipo de meteoro
-    let payload: Record<string, any>;
-
-    if (isCustom) {
-      payload = {
-        is_custom: true,
-        lat,
-        lon,
-        diameter_m: meteor.diameter_m,
-        velocity_kms: meteor.velocity_kms,
-        mass_kg: meteor.mass_kg,
-      };
-    } else {
-      if (!selectedAsteroidId) {
-        alert("Selecciona primero un asteroide en la lista.");
-        return;
-      }
-      payload = { is_custom: false, id: selectedAsteroidId, lat, lon };
-    }
-
-    try {
-      const res = await fetch(POST_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      console.log("POST OK", payload);
-    } catch (err) {
-      console.error("POST error", err);
-      alert("No se pudo enviar la selección al backend.");
-    }
   };
 
   return (
@@ -126,6 +93,8 @@ export default function App() {
             diameter_m={meteor.diameter_m}
             velocity_kms={meteor.velocity_kms}
             mass_kg={meteor.mass_kg}
+            isCustom={isCustom}
+            selectedAsteroidId={selectedAsteroidId}
             onDone={() => {
               alert("Simulación completada ✅");
               setPhase("menu");
