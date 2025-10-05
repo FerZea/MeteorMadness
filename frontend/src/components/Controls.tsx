@@ -126,15 +126,15 @@ export default function Controls({
           }}
         >
           <label style={{ display: "grid", gap: 4 }}>
-            <span style={{ opacity: 0.8, fontSize: 12 }}>Modo</span>
-            <strong>{isCustom ? "Meteorito personalizado" : "Seleccionado de lista"}</strong>
+            <span style={{ opacity: 0.8, fontSize: 12 }}>Mode</span>
+            <strong>{isCustom ? "Custome Meteorite" : "Select from the list"}</strong>
           </label>
 
           {isCustom ? (
             <>
-              <Field label="Diámetro (km)" value={diameter_km.toLocaleString()} />
-              <Field label="Velocidad (km/s)" value={velocity_kms.toLocaleString()} />
-              <Field label="Masa (kg)" value={mass_kg.toLocaleString()} />
+              <Field label="Diameter (km)" value={diameter_km.toLocaleString()} />
+              <Field label="Velocity (km/s)" value={velocity_kms.toLocaleString()} />
+              <Field label="Mass (kg)" value={mass_kg.toLocaleString()} />
             </>
           ) : (
             <Field label="Asteroide" value={selectedAsteroidId ?? "—"} />
@@ -147,23 +147,20 @@ export default function Controls({
               borderTop: "1px dashed rgba(255,255,255,0.1)",
             }}
           >
-            <small style={{ opacity: 0.8 }}>Ubicación en mapa</small>
+            <small style={{ opacity: 0.8 }}>Coordinates</small>
             <div style={{ marginTop: 6 }}>
               {typeof lat === "number" && typeof lon === "number" ? (
                 <code style={{ fontSize: 13 }}>
                   lat: {lat.toFixed(4)} • lon: {lon.toFixed(4)}
                 </code>
               ) : (
-                <span style={{ opacity: 0.8 }}>Haz clic en el globo para elegir ubicación.</span>
+                <span style={{ opacity: 0.8 }}>Click to Select Coords</span>
               )}
             </div>
           </div>
         </section>
 
-        <p style={{ marginTop: 12, fontSize: 12, opacity: 0.8, lineHeight: 1.5 }}>
-          Cuando estés listo, usa el botón{" "}
-          <em>Start simulation</em> para mostrar los resultados del impacto.
-        </p>
+       
 
         <div style={{ height: 80 }} />
       </aside>
@@ -210,7 +207,7 @@ export default function Controls({
             boxShadow: "0 6px 16px rgba(0,0,0,0.35)",
           }}
         >
-          ← Volver
+          ← Back
         </button>
 
         {/* Botón principal */}
