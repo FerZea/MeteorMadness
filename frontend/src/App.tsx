@@ -90,7 +90,7 @@ export default function App() {
           <Controls
             lat={selected.lat}
             lon={selected.lon}
-            diameter_m={meteor.diameter_m}
+            diameter_km={meteor.diameter_m}
             velocity_kms={meteor.velocity_kms}
             mass_kg={meteor.mass_kg}
             isCustom={isCustom}

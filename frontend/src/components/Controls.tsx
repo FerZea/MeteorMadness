@@ -4,7 +4,7 @@ import { useState } from "react";
 type Props = {
   lat?: number;
   lon?: number;
-  diameter_m: number;
+  diameter_km: number;
   velocity_kms: number;
   mass_kg: number;
   isCustom: boolean;
@@ -16,7 +16,7 @@ type Props = {
 export default function Controls({
   lat,
   lon,
-  diameter_m,
+  diameter_km,
   velocity_kms,
   mass_kg,
   isCustom,
@@ -35,13 +35,15 @@ export default function Controls({
 
     let payload: Record<string, any>;
     if (isCustom) {
-      payload = { is_custom: true, lat, lon, diameter_m, velocity_kms, mass_kg };
+      payload = { is_custom: true, lat, lon, diameter_km, velocity_kms, mass_kg };
+      console.log(true, lat, lon, diameter_km, velocity_kms, mass_kg);
     } else {
       if (!selectedAsteroidId) {
         alert("First select an asteroid from the list.");
         setBusy(false);
         return;
       }
+      console.log(false, selectedAsteroidId, lat, lon);
       payload = { is_custom: false, id: selectedAsteroidId, lat, lon };
     }
 
@@ -102,7 +104,7 @@ export default function Controls({
 
           {isCustom ? (
             <>
-              <Field label="Diámetro (m)" value={diameter_m.toLocaleString()} />
+              <Field label="Diámetro (m)" value={diameter_km.toLocaleString()} />
               <Field label="Velocidad (km/s)" value={velocity_kms.toLocaleString()} />
               <Field label="Masa (kg)" value={mass_kg.toLocaleString()} />
             </>

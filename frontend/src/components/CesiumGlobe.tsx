@@ -77,7 +77,17 @@ const CesiumGlobe: React.FC<CesiumGlobeProps> = ({ started, geojson, onPick }) =
             outlineWidth: 2,
             disableDepthTestDistance: Number.POSITIVE_INFINITY,
           },
-          
+          label: {
+            text: `Lat: ${lat.toFixed(4)}\nLon: ${lon.toFixed(4)}`,
+            font: "13px sans-serif",
+            pixelOffset: new Cesium.Cartesian2(0, -18),
+            fillColor: Cesium.Color.WHITE,
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 2,
+            showBackground: true,
+            backgroundColor: Cesium.Color.fromAlpha(Cesium.Color.BLACK, 0.5),
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          },
         });
       }
       viewer.scene.requestRender();
