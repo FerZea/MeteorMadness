@@ -94,25 +94,25 @@ const AsteroidTable: React.FC<Props> = ({
   };
 
   // --- POST al hacer click en una fila ---
-  const handleRowClick = async (a: Asteroid) => {
+    const handleRowClick = async (a: Asteroid) => {
     setPostingId(a.id);
     setPostMsg(null);
     setPostErr(null);
     try {
-      const res = await fetch(postEndpoint, {
+        const res = await fetch(postEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: a.id, name: a.name }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setPostMsg(`Enviado correctamente: ${a.name}`);
+        body: JSON.stringify({ id: a.id }), // 👈 solo enviamos el id
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        setPostMsg(`Enviado correctamente: ${a.id}`);
     } catch (e: any) {
-      setPostErr(e.message || "Error al enviar al backend");
+        setPostErr(e.message || "Error al enviar al backend");
     } finally {
-      setPostingId(null);
-      setTimeout(() => setPostMsg(null), 2500);
+        setPostingId(null);
+        setTimeout(() => setPostMsg(null), 2500);
     }
-  };
+    };
 
   const fmtNumber = (n: number, digits = 0) =>
     new Intl.NumberFormat(undefined, {
