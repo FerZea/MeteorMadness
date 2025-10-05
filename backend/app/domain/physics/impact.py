@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import json
+from pathlib import Path
 
 density = 3000        # density (kg/m^3), average meteor density
 PI = math.pi          # Pi constant
@@ -12,13 +13,17 @@ eulerConstant = math.e  # Euler’s number
 gravity = 9.81 * (10**-3)  # km/s^2
 targetDensity = 2500  # sedimentary rock density
 
-# Load config
-with open("config.json", "r") as f:
+CONFIG_PATH = Path(__file__).with_name("config.json")
+if not CONFIG_PATH.exists():
+    raise FileNotFoundError(f"config.json not found at {CONFIG_PATH.resolve()}\n(cwd={Path.cwd()})")
+
+with CONFIG_PATH.open("r") as f:
     config = json.load(f)
 
-relativeVelocity = config.get("relativeVelocity") # km/s
-diameter = config.get("diameter") # kilometers
-isTargetWater=config.get("water")
+relativeVelocity = config.get("relativeVelocity")  # km/s
+diameter = config.get("diameter")                  # km
+isTargetWater = config.get("water")
+
 
 if isTargetWater==1:
     targetDensity=1000
