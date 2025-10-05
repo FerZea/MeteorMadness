@@ -107,28 +107,26 @@ export default function CustomMeteorPanel({ onBack, onOpenCesium }: Props) {
 
             {/* Acciones */}
             <div className="row" style={{ gap: 8 }}>
-              <button className="btn btn-primary" type="submit">Simulate</button>
-              <button className="btn" type="button" onClick={onBack}>Cancel</button>
-            </div>
-
-            {/* Abrir Cesium (➡️ en km) */}
-            <div className="row" style={{ marginTop: 10 }}>
               <button
                 className="btn"
                 type="button"
                 onClick={() => onOpenCesium(diameterKm, velocity, masa)}
               >
-                View on map 🌍
+                Simulate 🌍
               </button>
+              <button className="btn" type="button" onClick={onBack}>Cancel</button>
             </div>
+
+            {/* Abrir Cesium (➡️ en km) */}
+           
           </form>
 
           {/* Columna derecha: preview 3D (➡️ en km) */}
           <div style={{ flex: "1 1 360px", minWidth: 320 }}>
             <MeteorComparation diameter={diameterKm} velocity={velocity} />
             <div style={{ marginTop: 8, fontSize: 13, color: "var(--muted)" }}>
-              Preview — scale and appearance react to values (km).
-              <br />Drag to rotate.
+              Information — Chicxulub meteorite is why the dinosaurs went extinct.
+              <br />
             </div>
           </div>
         </div>
