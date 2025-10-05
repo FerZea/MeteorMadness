@@ -60,6 +60,17 @@ class SimDetail(BaseModel):
     crater_diameter_m: float
     crater_depth_m: float
 
+
+class EarthquakeDetail(BaseModel):
+    id: str
+    magnitude: float
+    location: str
+    time_utc: str
+    longitude: float
+    latitude: float
+    depth_km: float
+    url: str
+
 # ---------- DETALLES SOBRE ISIT WATERAPPI ----------
 class IsitWater(BaseModel):
     water: bool
