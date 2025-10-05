@@ -1,61 +1,94 @@
 // src/components/MeteorPreview.tsx
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Environment, ContactShadows } from "@react-three/drei";
-import { useMemo, useRef } from "react";
+import { OrbitControls, Stars, useTexture, Html } from "@react-three/drei";
+import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
 
+// ✅ IMPORTA LAS URLS RESUELTAS POR VITE DESDE /public
+// (si están en public/textures/..., empieza con "/textures/..." y añade ?url)
+import diffuseUrl    from "/textures/meteor_diffuse.png?url";
+import normalUrl     from "/textures/meteor_normal.png?url";
+import roughnessUrl  from "/textures/meteor_roughness.png?url";
+
 type Props = {
-  diameter: number;      // metros
-  velocity: number;      // km/s
+  diameter: number; // m
+  velocity: number; // km/s
 };
 
 function MeteorMesh({ diameter, velocity }: Props) {
   const meshRef = useRef<THREE.Mesh>(null);
 
-  // Mapear diámetro (m) -> escala de la escena (unidades Three)
-  // Ajusta estos números a tu gusto:
   const scale = useMemo(() => {
-    const s = diameter / 50;              // 50 m ~ 1 unidad
-    return Math.max(0.2, Math.min(s, 10)); // clamp
+    const s = diameter / 50;
+    return THREE.MathUtils.clamp(s, 0.2, 10);
   }, [diameter]);
 
-  // Rotación proporcional a velocidad
-  useFrame((_, delta) => {
-    if (!meshRef.current) return;
-    const speed = 0.2 + velocity * 0.02;   // ajusta sensibilidad
-    meshRef.current.rotation.y += delta * speed;
-    meshRef.current.rotation.x += delta * (speed * 0.4);
-  });
+  // ✅ usa las URLs importadas
+  const [map, normalMap, roughnessMap] = useTexture([
+    diffuseUrl,
+    normalUrl,
+    roughnessUrl,
+  ]);
 
-  // Color que reacciona un poco a la velocidad
-  const color = velocity > 25 ? "#ff7043" : velocity > 15 ? "#f59e0b" : "#9ca3af";
+  useFrame((_, dt) => {
+    if (!meshRef.current) return;
+    const spin = 0.25 + velocity * 0.02;
+    meshRef.current.rotation.y += dt * spin;
+    meshRef.current.rotation.x += dt * (spin * 0.35);
+  });
 
   return (
     <mesh ref={meshRef} scale={scale} castShadow receiveShadow>
-      {/* Icosaedro con detalle para “rocoso” */}
       <icosahedronGeometry args={[1, 2]} />
-      <meshStandardMaterial color={color} roughness={0.9} metalness={0.05} />
+      <meshStandardMaterial
+        map={map}
+        normalMap={normalMap}
+        roughnessMap={roughnessMap}
+        roughness={0.95}
+        metalness={0.05}
+      />
     </mesh>
+  );
+}
+
+function OrbitalMeteor({ diameter, velocity }: Props) {
+  const orbitRef = useRef<THREE.Group>(null);
+
+  const orbitRadius = useMemo(() => {
+    const base = Math.max(3, diameter / 25);
+    return THREE.MathUtils.clamp(base, 3, 20);
+  }, [diameter]);
+
+  useFrame((_, dt) => {
+    if (!orbitRef.current) return;
+    const orbitalSpeed = 0.1 + velocity * 0.01;
+    orbitRef.current.rotation.y += dt * orbitalSpeed;
+    const t = performance.now() * 0.001;
+    orbitRef.current.position.y = Math.sin(t) * 0.2;
+  });
+
+  return (
+    <group ref={orbitRef}>
+      <group position={[orbitRadius, 0, 0]}>
+        <MeteorMesh diameter={diameter} velocity={velocity} />
+      </group>
+    </group>
   );
 }
 
 export default function MeteorPreview({ diameter, velocity }: Props) {
   return (
-    <div style={{ width: "100%", height: 360, background: "#0b1220", borderRadius: 12 }}>
-      <Canvas shadows camera={{ position: [3, 2, 5], fov: 45 }}>
-        <color attach="background" args={["#0b1220"]} />
-        <ambientLight intensity={0.5} />
-        <directionalLight
-          position={[5, 5, 5]}
-          intensity={1.2}
-          castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-        />
-        <MeteorMesh diameter={diameter} velocity={velocity} />
-        <ContactShadows opacity={0.35} scale={15} blur={2} far={6} />
-        <Environment preset="city" />
-        <OrbitControls enablePan={false} />
+    <div style={{ width: "100%", height: 360, background: "#000", borderRadius: 12 }}>
+      <Canvas shadows camera={{ position: [0, 2.2, 7], fov: 45 }}>
+        <color attach="background" args={["#000000"]} />
+        <Suspense fallback={<Html center style={{ color: "#fff" }}>Cargando meteorito…</Html>}>
+          <Stars radius={100} depth={50} count={8000} factor={2} saturation={0} fade speed={0.25} />
+          <ambientLight intensity={0.25} />
+          <directionalLight position={[6, 8, 4]} intensity={1.4} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
+          <directionalLight position={[-8, -2, -6]} intensity={0.35} color={"#6ea7ff"} />
+          <OrbitalMeteor diameter={diameter} velocity={velocity} />
+          <OrbitControls enablePan={false} />
+        </Suspense>
       </Canvas>
     </div>
   );
