@@ -15,7 +15,7 @@ class PhysicsService:
         # Run all calculations using your impact.py functions
         energy = impact.energyInMegaTons()
         velocity = impact.impactVelocity()
-        crater_diameter = finalCraterDiameter()  * 1000# km 
+        crater_diameter = impact.finalCraterDiameter()  * 1000# km 
         crater_depth =impact.finalCraterDepthKm() *1000  # km 
 
         # Wrap in your Pydantic schema
