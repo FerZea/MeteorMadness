@@ -9,7 +9,6 @@ frontend/dist/
 
 # Env files (no subir tokens)
 *.env
-backend/.env
 *.env.*
 !frontend/.env.example
 !backend/.env.example
