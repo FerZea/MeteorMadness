@@ -1,22 +1,75 @@
-import { useState } from 'react'
+// src/components/Controls.tsx
+import { useState } from "react";
+import { postMeteorImpact } from "../api/client";
 
-type Props = { onRun: (p: { lat: number; lon: number; diameter_m: number; velocity_kms: number }) => void; busy?: boolean }
+type Props = {
+  /** Coordenadas elegidas en el globo */
+  lat?: number;
+  lon?: number;
+  /** Parámetros físicos del meteorito (vienen de tu panel previo) */
+  diameter_m: number;
+  velocity_kms: number;
+  mass_kg: number;
+  onDone?: (result: unknown) => void;
+};
 
-export default function Controls({ onRun, busy }: Props) {
-  const [lat, setLat] = useState(23.6)
-  const [lon, setLon] = useState(-102.0)
-  const [diameter, setDiameter] = useState(120)
-  const [velocity, setVelocity] = useState(18.5)
+export default function Controls({
+  lat,
+  lon,
+  diameter_m,
+  velocity_kms,
+  mass_kg,
+  onDone,
+}: Props) {
+  const [busy, setBusy] = useState(false);
+  const canFire = typeof lat === "number" && typeof lon === "number" && !busy;
+
+  const handleFire = async () => {
+    if (!canFire) return;
+    setBusy(true);
+    try {
+      const res = await postMeteorImpact({
+        lat: lat!,
+        lon: lon!,
+        diameter_m,
+        velocity_kms,
+        mass_kg,
+      });
+      onDone?.(res);
+      alert("Impacto enviado con éxito ✅");
+    } catch (err: any) {
+      console.error(err);
+      alert("Error al enviar el impacto ❌");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
-    <div style={{ padding: 12, display: 'grid', gap: 8 }}>
-      <label>Lat <input type="number" value={lat} onChange={e => setLat(+e.target.value)} /></label>
-      <label>Lon <input type="number" value={lon} onChange={e => setLon(+e.target.value)} /></label>
-      <label>Diameter (m) <input type="number" value={diameter} onChange={e => setDiameter(+e.target.value)} /></label>
-      <label>Velocity (km/s) <input type="number" value={velocity} onChange={e => setVelocity(+e.target.value)} /></label>
-      <button onClick={() => onRun({ lat, lon, diameter_m: diameter, velocity_kms: velocity })} disabled={busy}>
-        {busy ? 'Simulando...' : 'Simular'}
+    <div
+      style={{
+        position: "fixed",
+        right: 16,
+        bottom: 16,
+        zIndex: 20,
+        display: "flex",
+        gap: 8,
+        alignItems: "center",
+      }}
+    >
+      <button
+        className="btn btn-primary"
+        disabled={!canFire}
+        onClick={handleFire}
+        title={canFire ? "Enviar impacto" : "Haz click en el mapa para elegir ubicación"}
+      >
+        {busy ? "Enviando…" : "🚀 Lanzar meteorito"}
       </button>
+      {!canFire && (
+        <span style={{ color: "white", textShadow: "0 1px 2px rgba(0,0,0,.6)" }}>
+          Click en el mapa para elegir ubicación
+        </span>
+      )}
     </div>
-  )
+  );
 }
