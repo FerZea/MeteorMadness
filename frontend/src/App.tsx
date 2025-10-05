@@ -37,7 +37,7 @@ export default function App() {
   const handlePickOnGlobe = async ({ lat, lon }: { lat: number; lon: number }) => {
     setSelected({ lat, lon });
 
-    const POST_URL = "http://192.168.100.32:8000/api/nasa/asteroid-selection";
+    const POST_URL = "http://192.168.100.32:8000/api/nasa/input";
 
     // Crea el payload según el tipo de meteoro
     let payload: Record<string, any>;
