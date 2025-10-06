@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import CesiumGlobe, { CesiumGlobeProps } from "./CesiumGlobe";
+import SimulatorInfo from "./SimulatorInfo";
 
 /** Estructura sugerida para lo que regresa tu backend (ajústala a tu API real) */
 export type ImpactBackendResult = {
@@ -121,6 +122,11 @@ export default function ImpactReviewOverlay({
           overflowY: "auto",
         }}
       >
+
+        {/* 🚀 Mostrar resultados de simulación */}
+        <SimulatorInfo />
+        
+
         <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
           <h2 style={{ margin: 0, fontSize: 18 }}>Impact review</h2>
           <button
@@ -149,19 +155,6 @@ export default function ImpactReviewOverlay({
           <Field label="Diameter (km)" value={diameter_km.toLocaleString()} />
           <Field label="Velocity (km/s)" value={velocity_kms.toLocaleString()} />
           <Field label="Mass (kg)" value={mass_kg.toLocaleString()} />
-        </Card>
-
-        {/* Resultados backend */}
-        <Card title="Backend result">
-          <Field label="Magnitude" value={fmtNum(backend?.magnitude)} />
-          <Field label="Energy (Mt TNT)" value={fmtNum(backend?.energy_megatons)} />
-          <Field label="Crater diameter (km)" value={fmtNum(backend?.crater_diameter_km)} />
-          <Field label="Impact radius (km)" value={fmtNum(backend?.impact_radius_km ?? impactRadiusKm)} />
-          {backend?.summary && (
-            <div style={{ marginTop: 8, fontSize: 13, opacity: 0.85, lineHeight: 1.35 }}>
-              {backend.summary}
-            </div>
-          )}
         </Card>
 
         <div style={{ fontSize: 12, opacity: 0.7 }}>
