@@ -113,7 +113,6 @@ MeteorMadness/
 |---|---|---|---|
 | ![Menu](./img/menu.jpeg) | ![Custom](./img/custom.jpeg) | ![List](./img/list.jpeg) | ![Simulation](./img/simulation.jpeg) |
 
-> Place your images under `docs/img/` with these file names: `menu.jpeg`, `custom.jpeg`, `list.jpeg`, `simulation.jpeg`.
 
 ---
 
