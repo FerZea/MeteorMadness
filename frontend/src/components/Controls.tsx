@@ -91,7 +91,6 @@ export default function Controls({
           mass_kg={mass_kg}
           isCustom={isCustom}
           selectedAsteroidId={selectedAsteroidId}
-          backend={result}
         />
       )}
 
