@@ -22,8 +22,7 @@ type SimulationResult = {
   } | null;
 };
 
-// Endpoint local de la API
-const DEFAULT_GET = "http://192.168.100.32:8000/api/impact/combined";
+const DEFAULT_GET = `${import.meta.env.VITE_API_BASE ?? "/api"}/impact/combined`;
 
 /**
  * Componente que muestra la información de la simulación actual.
@@ -37,23 +36,20 @@ export default function SimulatorInfo() {
 
   // Efecto: obtener los datos del backend al montar el componente
   useEffect(() => {
-    let mounted = true;
+    const ctrl = new AbortController();
     (async () => {
       try {
-        const res = await fetch(DEFAULT_GET);
+        const res = await fetch(DEFAULT_GET, { signal: ctrl.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json: SimulationResult = await res.json();
-
-        console.log("✅ Datos recibidos del backend:", json);
-        if (mounted) setData(json);
+        setData(json);
       } catch (err: any) {
-        console.error("❌ Error al obtener datos:", err);
-        if (mounted) setError(err.message);
+        if (err.name !== "AbortError") setError(err.message);
       } finally {
-        if (mounted) setLoading(false);
+        setLoading(false);
       }
     })();
-    return () => { mounted = false; };
+    return () => ctrl.abort();
   }, []);
 
   // Estados de carga y error

@@ -24,9 +24,9 @@ class NasaNeoClient:
             "api_key": self.api_key
         }
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30) as client:
             response = await client.get(url, params=params)
-            response.raise_for_status()  # lanza excepción si la respuesta es 4xx o 5xx
+            response.raise_for_status()
             return response.json()
 
     async def fetch_neo_by_id(self, neo_id: int) -> dict:
@@ -37,7 +37,7 @@ class NasaNeoClient:
         url = f"{self.BASE_URL}/neo/{neo_id}"
         params = {"api_key": self.api_key}
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30) as client:
             response = await client.get(url, params=params)
             response.raise_for_status()
             return response.json()

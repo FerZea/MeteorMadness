@@ -34,7 +34,7 @@ export default function Controls({
   const postImpact = async () => {
     if (typeof lat !== "number" || typeof lon !== "number") return;
 
-    const POST_URL = "http://192.168.100.32:8000/api/nasa/input";
+    const POST_URL = `${import.meta.env.VITE_API_BASE ?? "/api"}/nasa/input`;
     let payload: Record<string, any>;
 
     if (isCustom) {

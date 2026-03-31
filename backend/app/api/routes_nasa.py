@@ -32,8 +32,6 @@ async def receive_sim_input(payload: SimInput):
     is_water: bool = await serviceWater.get_water_info(payload.lat, payload.lon)
     water_flag = 1 if is_water else 0   # 👈 impact.py espera 0/1
 
-    print("here")
-
     if payload.is_custom:
         config = {
             "relativeVelocity": float(payload.velocity_kms),  # km/s

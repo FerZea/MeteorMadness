@@ -31,7 +31,7 @@ class IsItWaterClient:
         """
         params = {"latitude": lat, "longitude": lon}
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30) as client:
             response = await client.get(self.BASE_URL, headers=self.headers, params=params)
             response.raise_for_status()
             return response.json()

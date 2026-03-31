@@ -23,7 +23,7 @@ type Props = {
   selectedId?: number; // 👈 para resaltar
 };
 
-const DEFAULT_GET = "http://192.168.100.32:8000/api/nasa/closest";
+const DEFAULT_GET = `${import.meta.env.VITE_API_BASE ?? "/api"}/nasa/closest`;
 
 const AsteroidTable: React.FC<Props> = ({
   className,

@@ -3,16 +3,17 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
+    "dev": "node node_modules/vite/bin/vite.js",
+    "build": "tsc && node node_modules/vite/bin/vite.js build",
+    "preview": "node node_modules/vite/bin/vite.js preview",
     "postinstall": "npm run copy:cesium",
     "copy:cesium": "shx mkdir -p public/cesium && shx cp -r node_modules/cesium/Build/Cesium/* public/cesium/"
   },
   "dependencies": {
     "@react-three/drei": "^9.88.9",
     "@react-three/fiber": "^8.13.7",
-    "cesium": "^1.124.0",
+    "@zip.js/zip.js": "^2.7.44",
+    "cesium": "^1.119.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "three": "^0.157.0"

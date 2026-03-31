@@ -1,26 +1,28 @@
-import requests
+import httpx
 from datetime import datetime
 
-def get_earthquake_by_magnitude(min_magnitude: float):
+
+async def get_earthquake_by_magnitude(min_magnitude: float):
     """
-    Queries the USGS API for the most recent earthquake >= min_magnitude
-    and returns a single earthquake dictionary (or None if not found).
+    Consulta la API de USGS el terremoto más reciente con magnitud >= min_magnitude.
+    Devuelve un diccionario con los datos del sismo o None si no se encuentra.
     """
     url = "https://earthquake.usgs.gov/fdsnws/event/1/query"
     params = {
         "format": "geojson",
         "minmagnitude": min_magnitude,
         "orderby": "time",
-        "limit": 1  # only one result
+        "limit": 1,
     }
 
-    response = requests.get(url, params=params)
-    response.raise_for_status()
-    data = response.json()
+    async with httpx.AsyncClient(timeout=30) as client:
+        response = await client.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
 
     features = data.get("features", [])
     if not features:
-        return None  # no earthquake found
+        return None
 
     quake = features[0]
     props = quake.get("properties", {})
@@ -34,5 +36,5 @@ def get_earthquake_by_magnitude(min_magnitude: float):
         "longitude": coords[0],
         "latitude": coords[1],
         "depth_km": coords[2],
-        "url": props.get("url")
+        "url": props.get("url"),
     }

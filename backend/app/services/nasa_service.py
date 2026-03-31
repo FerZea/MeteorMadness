@@ -45,7 +45,6 @@ class NasaNeoService:
        
         data = await self.client.fetch_neo_by_id(neo_id)
         asteroid = data  # /neo/{id} devuelve un único asteroide
-        print("llamado")
         # Diámetro promedio (km)
         diam_km = asteroid["estimated_diameter"]["kilometers"]
         diameter_avg = (diam_km["estimated_diameter_min"] + diam_km["estimated_diameter_max"]) / 2
