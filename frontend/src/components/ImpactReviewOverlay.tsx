@@ -1,16 +1,6 @@
 import React, { useMemo } from "react";
-import CesiumGlobe, { CesiumGlobeProps } from "./CesiumGlobe";
-import SimulatorInfo from "./SimulatorInfo";
-
-/** Estructura sugerida para lo que regresa tu backend (ajústala a tu API real) */
-export type ImpactBackendResult = {
-  magnitude?: number;            // Mercalli o equivalente
-  energy_megatons?: number;      // Energía liberada
-  crater_diameter_km?: number;   // Diámetro de cráter estimado
-  impact_radius_km?: number;     // Radio afectación (onda, daños, etc.)
-  summary?: string;              // Texto descriptivo
-  [k: string]: any;              // Campos extra
-};
+import CesiumGlobe from "./CesiumGlobe";
+import SimulatorInfo, { SimulationResult } from "./SimulatorInfo";
 
 export type ImpactReviewOverlayProps = {
   open: boolean;   // visible u oculto
@@ -25,8 +15,8 @@ export type ImpactReviewOverlayProps = {
   isCustom: boolean;
   selectedAsteroidId: number | null;
 
-  // Datos devueltos por backend (puedes pasar todo el JSON)
-  backend?: ImpactBackendResult;
+  // Resultado completo de la simulación devuelto por el backend
+  backend?: SimulationResult;
 };
 
 /** Construye un círculo geodésico (Polygon GeoJSON) centrado en lat/lon con radio en km */
@@ -84,10 +74,10 @@ export default function ImpactReviewOverlay({
   selectedAsteroidId,
   backend,
 }: ImpactReviewOverlayProps) {
-  // radio de impacto a mostrar (preferimos el del backend si llega)
-  const impactRadiusKm = backend?.impact_radius_km ?? backend?.crater_diameter_km
-    ? (backend!.crater_diameter_km! / 2)
-    : Math.max(2, diameter_km * 1.8); // fallback simple
+  // radio de impacto: mitad del diámetro del cráter (m → km), o fallback simple
+  const impactRadiusKm = backend?.simulation?.crater_diameter_m
+    ? backend.simulation.crater_diameter_m / 2000
+    : Math.max(2, diameter_km * 1.8);
 
   // GeoJSON con círculo y punto
   const impactGeoJson = useMemo(() => {
@@ -123,8 +113,8 @@ export default function ImpactReviewOverlay({
         }}
       >
 
-        {/* 🚀 Mostrar resultados de simulación */}
-        <SimulatorInfo />
+        {/* Resultados de la simulación recibidos del backend */}
+        {backend && <SimulatorInfo data={backend} />}
         
 
         <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>

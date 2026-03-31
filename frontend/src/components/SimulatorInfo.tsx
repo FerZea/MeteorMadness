@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-/** 
- * Estructura esperada de la respuesta del backend
- */
-type SimulationResult = {
+export type SimulationResult = {
   simulation: {
     energy_in_megatons: number;
     impact_velocity: number;
@@ -22,41 +19,11 @@ type SimulationResult = {
   } | null;
 };
 
-const DEFAULT_GET = `${import.meta.env.VITE_API_BASE ?? "/api"}/impact/combined`;
+type Props = {
+  data: SimulationResult;
+};
 
-/**
- * Componente que muestra la información de la simulación actual.
- * - Hace una petición GET al backend cuando se monta.
- * - Muestra mensajes de carga, error y los resultados.
- */
-export default function SimulatorInfo() {
-  const [data, setData] = useState<SimulationResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Efecto: obtener los datos del backend al montar el componente
-  useEffect(() => {
-    const ctrl = new AbortController();
-    (async () => {
-      try {
-        const res = await fetch(DEFAULT_GET, { signal: ctrl.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json: SimulationResult = await res.json();
-        setData(json);
-      } catch (err: any) {
-        if (err.name !== "AbortError") setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    })();
-    return () => ctrl.abort();
-  }, []);
-
-  // Estados de carga y error
-  if (loading) return <div style={{ color: "#aaa" }}>Cargando resultados de simulación…</div>;
-  if (error) return <div style={{ color: "#b00020" }}>Error: {error}</div>;
-  if (!data) return <div style={{ color: "#aaa" }}>No hay datos disponibles.</div>;
-
+export default function SimulatorInfo({ data }: Props) {
   const { simulation, seismic_magnitude, related_earthquake } = data;
 
   return (
@@ -79,7 +46,6 @@ export default function SimulatorInfo() {
         <li><b>Magnitud sísmica:</b> {seismic_magnitude}</li>
       </ul>
 
-      {/* Datos del sismo relacionado, solo si existen */}
       {related_earthquake && (
         <div
           style={{

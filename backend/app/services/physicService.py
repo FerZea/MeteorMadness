@@ -8,10 +8,12 @@ logger = logging.getLogger(__name__)
 
 class ImpactEarthquakeService:
 
-    def run_simulation(self) -> SimDetail | None:
+    def run_simulation(
+        self, relative_velocity: float, diameter: float, is_water: bool
+    ) -> SimDetail | None:
         """Ejecuta la simulación de impacto y devuelve un SimDetail."""
         try:
-            calc = ImpactCalculator()
+            calc = ImpactCalculator(relative_velocity, diameter, is_water)
             return SimDetail(
                 energy_in_megatons=round(calc.energyInMegaTons(), 2),
                 impact_velocity=round(calc.impactVelocity(), 2),
@@ -31,16 +33,18 @@ class ImpactEarthquakeService:
             logger.error("Error fetching earthquake data: %s", e)
             return None
 
-    async def run_combined(self) -> dict | None:
+    async def run_combined(
+        self, relative_velocity: float, diameter: float, is_water: bool
+    ) -> dict | None:
         """
-        Ejecuta la simulación de impacto, calcula el efecto sísmico equivalente
-        y busca un terremoto real comparable en USGS.
+        Ejecuta la simulación completa y busca un terremoto real comparable.
+        Recibe los parámetros directamente, sin leer ningún archivo en disco.
         """
-        simulation = self.run_simulation()
+        simulation = self.run_simulation(relative_velocity, diameter, is_water)
         if not simulation:
             return None
         try:
-            calc = ImpactCalculator()
+            calc = ImpactCalculator(relative_velocity, diameter, is_water)
             seismic_magnitude = calc.seismicEffect()
             earthquake = await self.get_related_earthquake(seismic_magnitude)
             return {

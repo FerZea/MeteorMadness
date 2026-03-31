@@ -1,5 +1,6 @@
 import { useState } from "react";
-import ImpactReviewOverlay, { ImpactBackendResult } from "./ImpactReviewOverlay";
+import ImpactReviewOverlay from "./ImpactReviewOverlay";
+import { SimulationResult } from "./SimulatorInfo";
 
 type Props = {
   lat?: number;
@@ -26,7 +27,7 @@ export default function Controls({
 }: Props) {
   const [busy, setBusy] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
-  const [result, setResult] = useState<ImpactBackendResult | undefined>(undefined);
+  const [result, setResult] = useState<SimulationResult | undefined>(undefined);
 
   const canFire = typeof lat === "number" && typeof lon === "number" && !busy;
 
@@ -34,7 +35,7 @@ export default function Controls({
   const postImpact = async () => {
     if (typeof lat !== "number" || typeof lon !== "number") return;
 
-    const POST_URL = `${import.meta.env.VITE_API_BASE ?? "/api"}/nasa/input`;
+    const POST_URL = `${import.meta.env.VITE_API_BASE ?? "/api"}/impact/simulate`;
     let payload: Record<string, any>;
 
     if (isCustom) {
@@ -55,7 +56,7 @@ export default function Controls({
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: ImpactBackendResult = await res.json();
+      const data: SimulationResult = await res.json();
 
       setResult(data);
       setReviewOpen(true);
